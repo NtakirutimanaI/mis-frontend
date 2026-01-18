@@ -3,10 +3,11 @@ import { useAuth } from '../context/AuthContext';
 import {
     FaChartBar, FaUser, FaEnvelope, FaSignOutAlt, FaCog, FaBook,
     FaSearch, FaPlus, FaBell, FaDatabase, FaMoon, FaSun,
-    FaCheck, FaTrash, FaTimes, FaProjectDiagram, FaBars
+    FaCheck, FaTrash, FaTimes, FaProjectDiagram, FaBars, FaGlobe
 } from 'react-icons/fa';
 import { useState, useEffect, useRef } from 'react';
 import { notificationService, type Notification } from '../services/notificationService';
+import { profileService, type ContactMessage } from '../services/profileService';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const AdminLayout = () => {
@@ -32,6 +33,12 @@ const AdminLayout = () => {
     const addMenuRef = useRef<HTMLDivElement>(null);
     const profileMenuRef = useRef<HTMLDivElement>(null);
 
+    // Messages State
+    const [messages, setMessages] = useState<ContactMessage[]>([]);
+    const [unreadMessages, setUnreadMessages] = useState(0);
+    const [showMessages, setShowMessages] = useState(false);
+    const messagesRef = useRef<HTMLDivElement>(null);
+
     // Save to localStorage whenever isDark changes
     useEffect(() => {
         localStorage.setItem('adminTheme', isDark ? 'dark' : 'light');
@@ -55,10 +62,31 @@ const AdminLayout = () => {
         return () => clearInterval(interval);
     }, []);
 
+    // Fetch Messages
+    useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                const data = await profileService.getContactMessages();
+                setMessages(data.slice(0, 5)); // Get latest 5
+                setUnreadMessages(data.filter(m => !m.status || m.status === 'new' || m.status === 'unread').length);
+            } catch (error) {
+                console.error("Failed to load messages", error);
+            }
+        };
+        fetchMessages();
+
+        // Poll every minute
+        const interval = setInterval(fetchMessages, 60000);
+        return () => clearInterval(interval);
+    }, []);
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
                 setShowNotifications(false);
+            }
+            if (messagesRef.current && !messagesRef.current.contains(event.target as Node)) {
+                setShowMessages(false);
             }
             if (addMenuRef.current && !addMenuRef.current.contains(event.target as Node)) {
                 setShowAddMenu(false);
@@ -102,6 +130,7 @@ const AdminLayout = () => {
         { path: '/admin/resources', icon: <FaDatabase />, label: 'Resources' },
         { path: '/admin/api-docs', icon: <FaBook />, label: 'API Docs' },
         { path: '/admin/messages', icon: <FaEnvelope />, label: 'Messages' },
+        { path: '/admin/footer-settings', icon: <FaGlobe />, label: 'Footer' },
         { path: '/admin/settings', icon: <FaCog />, label: 'Settings' },
     ];
 
@@ -132,7 +161,7 @@ const AdminLayout = () => {
                     {/* Brand Logo */}
                     <Link to="/" className="admin-brand">
                         <span style={{ width: '12px', height: '12px', background: 'var(--primary-yellow)', borderRadius: '50%', display: 'inline-block' }}></span>
-                        Admin Panel
+                        Innocent Panel
                     </Link>
 
                     {/* Search Bar */}
@@ -205,9 +234,108 @@ const AdminLayout = () => {
                         {isDark ? <FaSun /> : <FaMoon />}
                     </button>
 
-                    <Link to="/admin/messages" className="admin-icon-btn" title="Messages">
-                        <FaEnvelope />
-                    </Link>
+                    <div style={{ position: 'relative' }} ref={messagesRef}>
+                        <button className="admin-icon-btn" title="Messages" onClick={() => setShowMessages(!showMessages)}>
+                            <FaEnvelope />
+                            {unreadMessages > 0 && <span className="admin-badge">{unreadMessages}</span>}
+                        </button>
+
+                        <AnimatePresence>
+                            {showMessages && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    style={{
+                                        position: 'absolute',
+                                        right: 0,
+                                        top: '120%',
+                                        width: '350px',
+                                        maxHeight: '450px',
+                                        background: 'var(--bg-card)',
+                                        border: '1px solid var(--border-color)',
+                                        borderRadius: '12px',
+                                        boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
+                                        zIndex: 1000,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        overflow: 'hidden'
+                                    }}
+                                >
+                                    <div style={{ padding: '10px 15px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-body)' }}>
+                                        <h4 style={{ fontWeight: 800, fontSize: '0.9rem' }}>Recent Messages</h4>
+                                        <button onClick={() => setShowMessages(false)} style={{ color: 'var(--text-muted)' }}><FaTimes /></button>
+                                    </div>
+
+                                    <div style={{ overflowY: 'auto', flex: 1 }}>
+                                        {messages.length === 0 ? (
+                                            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                No messages yet
+                                            </div>
+                                        ) : (
+                                            messages.map(msg => (
+                                                <Link
+                                                    key={msg.id}
+                                                    to="/admin/messages"
+                                                    onClick={() => setShowMessages(false)}
+                                                    style={{
+                                                        display: 'block',
+                                                        padding: '12px 15px',
+                                                        borderBottom: '1px solid var(--border-color)',
+                                                        background: (!msg.status || msg.status === 'new' || msg.status === 'unread') ? 'rgba(248, 180, 0, 0.05)' : 'transparent',
+                                                        borderLeft: `3px solid ${(!msg.status || msg.status === 'new' || msg.status === 'unread') ? 'var(--primary-yellow)' : 'transparent'}`,
+                                                        textDecoration: 'none',
+                                                        color: 'inherit',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-body)'}
+                                                    onMouseLeave={(e) => e.currentTarget.style.background = (!msg.status || msg.status === 'new' || msg.status === 'unread') ? 'rgba(248, 180, 0, 0.05)' : 'transparent'}
+                                                >
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                                        <span style={{ fontWeight: (!msg.status || msg.status === 'new' || msg.status === 'unread') ? 800 : 600, fontSize: '0.9rem' }}>{msg.name}</span>
+                                                        {(!msg.status || msg.status === 'new' || msg.status === 'unread') && (
+                                                            <span style={{
+                                                                fontSize: '0.65rem',
+                                                                padding: '0.15rem 0.4rem',
+                                                                borderRadius: '8px',
+                                                                background: 'var(--primary-yellow)',
+                                                                color: 'white',
+                                                                fontWeight: 700
+                                                            }}>NEW</span>
+                                                        )}
+                                                    </div>
+                                                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                        {msg.subject || 'No subject'}
+                                                    </p>
+                                                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                                        {new Date(msg.createdAt || Date.now()).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </Link>
+                                            ))
+                                        )}
+                                    </div>
+
+                                    <Link
+                                        to="/admin/messages"
+                                        onClick={() => setShowMessages(false)}
+                                        style={{
+                                            padding: '10px 15px',
+                                            borderTop: '1px solid var(--border-color)',
+                                            textAlign: 'center',
+                                            color: 'var(--primary-teal)',
+                                            fontWeight: 700,
+                                            fontSize: '0.85rem',
+                                            textDecoration: 'none',
+                                            display: 'block',
+                                            background: 'var(--bg-body)'
+                                        }}
+                                    >
+                                        View All Messages
+                                    </Link>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
 
                     <div style={{ position: 'relative' }} ref={notifRef}>
                         <button className="admin-icon-btn" title="Notifications" onClick={toggleNotifications}>

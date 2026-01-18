@@ -1,221 +1,443 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { FaUser, FaRobot, FaCalendarAlt, FaTrash, FaMapMarkerAlt, FaEnvelope, FaDesktop, FaArrowLeft } from 'react-icons/fa';
-import { chatService, type ChatConversation } from '../../services/chatService';
+import { FaUser, FaCalendarAlt, FaEnvelope, FaPhone, FaBuilding, FaCheck, FaClock, FaTrash, FaInbox } from 'react-icons/fa';
+import { profileService, type ContactMessage } from '../../services/profileService';
 import Loading from '../../components/Loading';
 import { useToast } from '../../context/ToastContext';
 
 const Messages = () => {
     const { searchQuery } = useOutletContext<{ searchQuery: string }>();
     const { showToast } = useToast();
-    const [conversations, setConversations] = useState<ChatConversation[]>([]);
-    const [selectedConv, setSelectedConv] = useState<ChatConversation | null>(null);
+    const [messages, setMessages] = useState<ContactMessage[]>([]);
+    const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
     const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
 
     useEffect(() => {
-        loadConversations();
+        loadMessages();
     }, []);
 
-    const loadConversations = async () => {
+    const loadMessages = async () => {
         try {
-            const data = await chatService.getAllConversations();
-            setConversations(data);
+            const data = await profileService.getContactMessages();
+            setMessages(data);
         } catch (error) {
             console.error(error);
+            showToast('Failed to load messages', 'error');
         } finally {
             setLoading(false);
         }
     };
 
-    if (loading) return <Loading />;
+    const handleSelectMessage = async (msg: ContactMessage) => {
+        setSelectedMessage(msg);
 
-    const handleDelete = async (e: React.MouseEvent, id: string) => {
-        e.stopPropagation(); // prevent selecting the conversation when clicking delete
-        if (!confirm('Are you sure you want to delete this conversation? This cannot be undone.')) return;
-
-        try {
-            await chatService.deleteConversation(id);
-            setConversations(prev => prev.filter(c => c.id !== id));
-            showToast('Conversation deleted successfully', 'success');
-            if (selectedConv?.id === id) {
-                setSelectedConv(null);
+        // Mark as read if it's unread
+        if (!msg.status || msg.status === 'unread' || msg.status === 'new') {
+            try {
+                await profileService.markMessageAsRead(msg.id!);
+                // Update local state
+                setMessages(prev => prev.map(m =>
+                    m.id === msg.id ? { ...m, status: 'read' as any } : m
+                ));
+            } catch (error) {
+                console.error('Failed to mark message as read:', error);
             }
-        } catch (error) {
-            console.error('Failed to delete', error);
-            showToast('Failed to delete conversation', 'error');
         }
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const handleDelete = async (messageId: string) => {
+        if (!confirm('Are you sure you want to delete this message? This cannot be undone.')) {
+            return;
+        }
+
+        try {
+            setMessages(prev => prev.filter(m => m.id !== messageId));
+            if (selectedMessage?.id === messageId) {
+                setSelectedMessage(null);
+            }
+            showToast('Message deleted successfully', 'success');
+        } catch (error) {
+            console.error('Failed to delete message:', error);
+            showToast('Failed to delete message', 'error');
+        }
     };
 
-    const filteredConversations = conversations.filter(c => {
+    if (loading) return <Loading />;
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleString([], {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    const filteredMessages = messages.filter(m => {
         const query = (searchQuery || '').toLowerCase();
-        return c.sessionId.toLowerCase().includes(query) ||
-            c.messages.some(m => m.content.toLowerCase().includes(query)) ||
-            (c.email && c.email.toLowerCase().includes(query)) ||
-            (c.location && c.location.toLowerCase().includes(query));
+        const matchesSearch = m.name.toLowerCase().includes(query) ||
+            m.email.toLowerCase().includes(query) ||
+            (m.subject && m.subject.toLowerCase().includes(query)) ||
+            (m.message && m.message.toLowerCase().includes(query)) ||
+            (m.phone && m.phone.toLowerCase().includes(query));
+
+        const matchesFilter = filter === 'all' ||
+            (filter === 'unread' && (!m.status || m.status === 'unread' || m.status === 'new')) ||
+            (filter === 'read' && m.status === 'read');
+
+        return matchesSearch && matchesFilter;
     });
 
+    const unreadCount = messages.filter(m => !m.status || m.status === 'unread' || m.status === 'new').length;
+
     return (
-        <div className={`messages-layout ${selectedConv ? 'view-active' : ''}`} style={{ height: 'calc(100vh - 150px)' }}>
-            {/* Sidebar List */}
-            <div className="content-card messages-sidebar" style={{ display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
-                <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-white)' }}>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.2rem' }}>Conversations</h2>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Found {filteredConversations.length} sessions</p>
-                </div>
+        <div style={{ height: 'calc(100vh - 180px)', display: 'flex', flexDirection: 'column' }}>
+            {/* Header */}
+            <div style={{ marginBottom: '1.5rem' }}>
+                <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+                    Contact Messages
+                </h1>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+                    Messages submitted through the contact form on your public portfolio
+                </p>
+            </div>
 
-                <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem', background: 'var(--bg-body)' }}>
-                    {filteredConversations.map(conv => {
-                        const lastMsg = conv.messages[conv.messages.length - 1];
-                        return (
-                            <div
-                                key={conv.id}
-                                className="group"
-                                style={{ position: 'relative' }}
+            {/* Stats and Filters */}
+            <div className="content-card" style={{
+                padding: '1.25rem',
+                marginBottom: '1.5rem',
+                background: 'linear-gradient(135deg, var(--bg-white) 0%, var(--bg-body) 100%)'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+                        <div>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
+                                Total Messages
+                            </p>
+                            <p style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                                {messages.length}
+                            </p>
+                        </div>
+                        <div>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
+                                Unread
+                            </p>
+                            <p style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--primary-yellow)' }}>
+                                {unreadCount}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Filter Buttons */}
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        {(['all', 'unread', 'read'] as const).map(f => (
+                            <button
+                                key={f}
+                                onClick={() => setFilter(f)}
+                                style={{
+                                    padding: '0.4rem 0.9rem',
+                                    borderRadius: '6px',
+                                    fontSize: '0.85rem',
+                                    border: filter === f ? '2px solid var(--primary-yellow)' : '1px solid var(--border-color)',
+                                    background: filter === f ? 'rgba(248, 180, 0, 0.1)' : 'var(--bg-white)',
+                                    color: filter === f ? 'var(--text-main)' : 'var(--text-muted)',
+                                    fontWeight: filter === f ? 600 : 400,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    textTransform: 'capitalize'
+                                }}
                             >
-                                <button
-                                    onClick={() => setSelectedConv(conv)}
-                                    style={{
-                                        width: '100%', padding: '1rem', borderRadius: '8px', textAlign: 'left',
-                                        display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '0.5rem',
-                                        border: selectedConv?.id === conv.id ? '1px solid var(--primary-yellow)' : '1px solid transparent',
-                                        background: selectedConv?.id === conv.id ? 'rgba(248, 180, 0, 0.1)' : 'var(--bg-white)',
-                                        transition: 'all 0.2s',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                                        <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--primary-teal)' }}>ID: {conv.sessionId.slice(0, 8)}...</span>
-                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{formatDate(conv.updatedAt)}</span>
-                                    </div>
-                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '20px' }}>
-                                        {lastMsg ? (
-                                            <span style={{ color: lastMsg.sender === 'user' ? 'var(--text-main)' : 'var(--text-muted)', fontStyle: lastMsg.sender === 'user' ? 'normal' : 'italic' }}>
-                                                {lastMsg.sender === 'user' ? '👤 ' : '🤖 '}{lastMsg.content}
-                                            </span>
-                                        ) : (
-                                            <span style={{ color: 'var(--text-muted)' }}>No messages</span>
-                                        )}
-                                    </div>
-                                </button>
-
-                                <button
-                                    onClick={(e) => handleDelete(e, conv.id)}
-                                    className="delete-btn"
-                                    style={{
-                                        position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
-                                        background: 'var(--bg-white)', color: 'var(--primary-red)', border: '1px solid var(--border-color)',
-                                        borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        cursor: 'pointer', zIndex: 10, opacity: 0, transition: 'opacity 0.2s'
-                                    }}
-                                    title="Delete Conversation"
-                                >
-                                    <FaTrash size={12} />
-                                </button>
-                                <style>{`
-                                    .group:hover .delete-btn { opacity: 1; }
-                                `}</style>
-                            </div>
-                        );
-                    })}
+                                {f}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            {/* Main Chat View */}
-            <div className="content-card messages-content" style={{ display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', position: 'relative' }}>
-                {selectedConv ? (
-                    <>
-                        <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-white)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-                                    <button className="mobile-back-btn" onClick={() => setSelectedConv(null)}>
-                                        <FaArrowLeft />
-                                    </button>
-                                    <h3 style={{ fontWeight: 800, fontSize: '1.1rem', margin: 0 }}>Session: {selectedConv.sessionId}</h3>
-                                </div>
-                                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <FaCalendarAlt /> Started: {formatDate(selectedConv.createdAt)}
+            {/* Two-Panel Layout: List LEFT, Detail RIGHT */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: selectedMessage ? '400px 1fr' : '400px',
+                gap: '1.5rem',
+                flex: 1,
+                overflow: 'hidden',
+                minHeight: 0
+            }}>
+                {/* LEFT Panel - Message List */}
+                <div className="content-card" style={{
+                    padding: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden'
+                }}>
+                    <div style={{
+                        padding: '1rem 1.25rem',
+                        borderBottom: '1px solid var(--border-color)',
+                        background: 'var(--bg-white)'
+                    }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>
+                            Inbox ({filteredMessages.length})
+                        </h3>
+                    </div>
+
+                    <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg-body)' }}>
+                        {filteredMessages.length === 0 ? (
+                            <div style={{
+                                textAlign: 'center',
+                                padding: '3rem 1rem',
+                                color: 'var(--text-muted)'
+                            }}>
+                                <FaInbox size={40} style={{ marginBottom: '1rem', opacity: 0.2 }} />
+                                <p style={{ fontSize: '0.95rem' }}>
+                                    {filter === 'all' ? 'No messages yet' : `No ${filter} messages`}
+                                </p>
+                            </div>
+                        ) : (
+                            filteredMessages.map((msg: any) => (
+                                <div
+                                    key={msg.id}
+                                    onClick={() => handleSelectMessage(msg)}
+                                    style={{
+                                        padding: '1.5rem 1.5rem',
+                                        minHeight: '140px',
+                                        borderBottom: '1px solid var(--border-color)',
+                                        borderLeft: `3px solid ${!msg.status || msg.status === 'unread' || msg.status === 'new' ? 'var(--primary-yellow)' : 'transparent'}`,
+                                        background: selectedMessage?.id === msg.id ? 'rgba(248, 180, 0, 0.08)' : 'var(--bg-white)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'space-between'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (selectedMessage?.id !== msg.id) {
+                                            e.currentTarget.style.background = 'var(--bg-body)';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (selectedMessage?.id !== msg.id) {
+                                            e.currentTarget.style.background = 'var(--bg-white)';
+                                        }
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                                        <h4 style={{
+                                            fontSize: '0.95rem',
+                                            fontWeight: !msg.status || msg.status === 'unread' || msg.status === 'new' ? 700 : 500,
+                                            margin: 0,
+                                            color: 'var(--text-main)'
+                                        }}>
+                                            {msg.name}
+                                        </h4>
+                                        {(!msg.status || msg.status === 'unread' || msg.status === 'new') && (
+                                            <span style={{
+                                                width: '8px',
+                                                height: '8px',
+                                                borderRadius: '50%',
+                                                background: 'var(--primary-yellow)',
+                                                flexShrink: 0
+                                            }} />
+                                        )}
+                                    </div>
+                                    {msg.subject && (
+                                        <p style={{
+                                            fontSize: '0.85rem',
+                                            color: 'var(--text-main)',
+                                            margin: '0 0 0.5rem 0',
+                                            fontWeight: 600,
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 1,
+                                            WebkitBoxOrient: 'vertical',
+                                            overflow: 'hidden'
+                                        }}>
+                                            {msg.subject}
+                                        </p>
+                                    )}
+                                    <p style={{
+                                        fontSize: '0.85rem',
+                                        color: 'var(--text-muted)',
+                                        margin: '0 0 0.8rem 0',
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: 'vertical',
+                                        overflow: 'hidden',
+                                        lineHeight: '1.4'
+                                    }}>
+                                        {msg.message}
                                     </p>
-                                    {selectedConv.email && (
-                                        <p style={{ fontSize: '0.8rem', color: 'var(--primary-teal)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <FaEnvelope /> {selectedConv.email}
+                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
+                                        {formatDate(msg.createdAt)}
+                                    </p>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* RIGHT Panel - Message Detail */}
+                {selectedMessage && (
+                    <div className="content-card" style={{
+                        padding: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'hidden'
+                    }}>
+                        {/* Header */}
+                        <div style={{
+                            padding: '1.25rem',
+                            borderBottom: '1px solid var(--border-color)',
+                            background: 'var(--bg-white)',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <span style={{
+                                    padding: '0.25rem 0.75rem',
+                                    borderRadius: '12px',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 600,
+                                    background: !selectedMessage.status || selectedMessage.status === 'unread' || selectedMessage.status === 'new' ? 'rgba(248, 180, 0, 0.15)' : 'rgba(0, 128, 128, 0.15)',
+                                    color: !selectedMessage.status || selectedMessage.status === 'unread' || selectedMessage.status === 'new' ? 'var(--primary-yellow)' : 'var(--primary-teal)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.4rem'
+                                }}>
+                                    {!selectedMessage.status || selectedMessage.status === 'unread' || selectedMessage.status === 'new' ? <FaClock size={10} /> : <FaCheck size={10} />}
+                                    {!selectedMessage.status || selectedMessage.status === 'unread' || selectedMessage.status === 'new' ? 'NEW' : 'READ'}
+                                </span>
+                            </div>
+                            <button
+                                onClick={() => handleDelete(selectedMessage.id!)}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    borderRadius: '6px',
+                                    border: '1px solid var(--primary-red)',
+                                    background: 'transparent',
+                                    color: 'var(--primary-red)',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    fontSize: '0.85rem',
+                                    fontWeight: 500,
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'var(--primary-red)';
+                                    e.currentTarget.style.color = 'white';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'transparent';
+                                    e.currentTarget.style.color = 'var(--primary-red)';
+                                }}
+                            >
+                                <FaTrash size={12} /> Delete
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
+                            {/* Sender Info */}
+                            <div style={{ marginBottom: '2rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                                    <div style={{
+                                        width: '50px',
+                                        height: '50px',
+                                        borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, var(--primary-yellow) 0%, var(--primary-teal) 100%)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: 'white'
+                                    }}>
+                                        <FaUser size={22} />
+                                    </div>
+                                    <div>
+                                        <h2 style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0 }}>
+                                            {selectedMessage.name}
+                                        </h2>
+                                        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0.25rem 0 0 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                            <FaCalendarAlt size={11} />
+                                            {formatDate(selectedMessage.createdAt!)}
                                         </p>
+                                    </div>
+                                </div>
+
+                                {/* Subject */}
+                                {selectedMessage.subject && (
+                                    <div style={{
+                                        padding: '0.75rem 1rem',
+                                        background: 'var(--bg-body)',
+                                        borderRadius: '6px',
+                                        marginBottom: '1rem'
+                                    }}>
+                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0 0 0.25rem 0' }}>
+                                            Subject
+                                        </p>
+                                        <p style={{ fontSize: '1rem', fontWeight: 600, margin: 0 }}>
+                                            {selectedMessage.subject}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Contact Info */}
+                                <div style={{
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    gap: '1.5rem',
+                                    padding: '1rem',
+                                    background: 'var(--bg-body)',
+                                    borderRadius: '6px'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+                                        <FaEnvelope size={15} style={{ color: 'var(--primary-teal)' }} />
+                                        <a href={`mailto:${selectedMessage.email}`} style={{
+                                            color: 'var(--primary-teal)',
+                                            textDecoration: 'none',
+                                            fontWeight: 500
+                                        }}>
+                                            {selectedMessage.email}
+                                        </a>
+                                    </div>
+
+                                    {selectedMessage.phone && (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+                                            <FaPhone size={15} style={{ color: 'var(--text-muted)' }} />
+                                            <span style={{ fontWeight: 500 }}>{selectedMessage.phone}</span>
+                                        </div>
                                     )}
-                                    {selectedConv.location && (
-                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <FaMapMarkerAlt /> {selectedConv.location}
-                                        </p>
-                                    )}
-                                    {selectedConv.device && (
-                                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <FaDesktop /> {selectedConv.device}
-                                        </p>
+
+                                    {selectedMessage.company && (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+                                            <FaBuilding size={15} style={{ color: 'var(--text-muted)' }} />
+                                            <span style={{ fontWeight: 500 }}>{selectedMessage.company}</span>
+                                        </div>
                                     )}
                                 </div>
                             </div>
 
-                            <button
-                                onClick={(e) => handleDelete(e, selectedConv.id)}
-                                className="btn-primary"
-                                style={{ background: 'transparent', border: '1px solid var(--primary-red)', color: 'var(--primary-red)', fontSize: '0.9rem', padding: '0.5rem 1rem' }}
-                            >
-                                <FaTrash /> Delete
-                            </button>
-                        </div>
-
-                        <div style={{ flex: 1, overflowY: 'auto', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'var(--bg-body)' }}>
-                            {selectedConv.messages.map((msg) => (
-                                <div
-                                    key={msg.id}
-                                    style={{
-                                        display: 'flex',
-                                        gap: '1rem',
-                                        flexDirection: msg.sender === 'user' ? 'row' : 'row-reverse',
-                                        alignItems: 'flex-start'
-                                    }}
-                                >
-                                    <div style={{
-                                        width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        border: '1px solid var(--border-color)',
-                                        background: msg.sender === 'user' ? 'var(--bg-white)' : 'rgba(248, 180, 0, 0.1)'
-                                    }}>
-                                        {msg.sender === 'user'
-                                            ? <FaUser style={{ color: 'var(--text-muted)' }} />
-                                            : <FaRobot style={{ color: 'var(--primary-yellow)' }} />
-                                        }
-                                    </div>
-
-                                    <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '70%', alignItems: msg.sender === 'user' ? 'flex-start' : 'flex-end' }}>
-                                        <div style={{
-                                            padding: '1rem',
-                                            borderRadius: '12px',
-                                            fontSize: '0.95rem',
-                                            lineHeight: '1.5',
-                                            background: msg.sender === 'user' ? 'var(--bg-white)' : 'rgba(248, 180, 0, 0.15)',
-                                            color: 'var(--text-main)',
-                                            border: '1px solid var(--border-color)',
-                                            borderTopLeftRadius: msg.sender === 'user' ? 0 : '12px',
-                                            borderTopRightRadius: msg.sender === 'user' ? '12px' : 0
-                                        }}>
-                                            {msg.content}
-                                        </div>
-                                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', padding: '0 4px' }}>
-                                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
-                                    </div>
+                            {/* Message Content */}
+                            <div>
+                                <h3 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    Message
+                                </h3>
+                                <div style={{
+                                    background: 'var(--bg-white)',
+                                    padding: '1.5rem',
+                                    borderRadius: '8px',
+                                    fontSize: '1rem',
+                                    lineHeight: '1.7',
+                                    whiteSpace: 'pre-wrap',
+                                    border: '1px solid var(--border-color)',
+                                    color: 'var(--text-main)'
+                                }}>
+                                    {selectedMessage.message || 'No message content'}
                                 </div>
-                            ))}
+                            </div>
                         </div>
-                    </>
-                ) : (
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                        <FaRobot size={48} style={{ marginBottom: '1rem', opacity: 0.2 }} />
-                        <p>Select a conversation to view history</p>
                     </div>
                 )}
             </div>

@@ -42,11 +42,12 @@ const Footer: React.FC<FooterProps> = ({ profile }) => {
                         <div className="footer-social">
                             {profile.socialLinks.linkedin && <a href={profile.socialLinks.linkedin} target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>}
                             {profile.socialLinks.twitter && <a href={profile.socialLinks.twitter} target="_blank" rel="noopener noreferrer"><FaTwitter /></a>}
+                            {profile.socialLinks.github && <a href={profile.socialLinks.github} target="_blank" rel="noopener noreferrer"><FaGithub /></a>}
                         </div>
                     </div>
                     <div className="footer-item footer-copyright">
                         <p>© {new Date().getFullYear()} By {profile.firstName} {profile.lastName}</p>
-                        <p className="footer-powered">Powered and secured by Wix</p>
+                        <p className="footer-powered">{profile.poweredBy || 'Powered and secured by MIS'}</p>
                     </div>
                 </div>
             </div>

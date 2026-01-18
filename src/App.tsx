@@ -16,6 +16,7 @@ import ProfileManagement from './pages/admin/ProfileManagement';
 import ApiDocs from './pages/admin/ApiDocs';
 import Messages from './pages/admin/Messages';
 import Resources from './pages/admin/Resources';
+import FooterSettings from './pages/admin/FooterSettings';
 
 import Settings from './pages/admin/Settings';
 
@@ -75,6 +76,7 @@ function App() {
                 <Route path="/admin/api-docs" element={<ApiDocs />} />
                 <Route path="/admin/messages" element={<Messages />} />
                 <Route path="/admin/resources" element={<Resources />} />
+                <Route path="/admin/footer-settings" element={<FooterSettings />} />
                 <Route path="/admin/settings" element={<Settings />} />
               </Route>
             </Route>

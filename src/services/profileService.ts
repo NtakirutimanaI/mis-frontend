@@ -6,9 +6,9 @@ export interface ContactMessage {
     email: string;
     phone?: string;
     company?: string;
-    subject: string;
+    subject?: string;
     message: string;
-    status?: 'unread' | 'read' | 'replied';
+    status?: 'new' | 'unread' | 'read' | 'replied';
     createdAt?: string;
 }
 
@@ -20,6 +20,8 @@ export interface Profile {
     email: string;
     bio: string;
     title: string;
+    type?: string;
+    role?: string;
     location: string;
     phone: string;
     website: string;
@@ -27,6 +29,7 @@ export interface Profile {
     yearsOfExperience: number;
     availableForHire: boolean;
     isPublic: boolean;
+    poweredBy?: string;
     education: Array<{
         degree: string;
         institution: string;
@@ -62,6 +65,8 @@ export interface Profile {
         category?: 'Backend' | 'Frontend' | 'UI/UX' | 'Fullstack' | 'Other';
         effectiveness?: number; // 0-100
         published?: boolean;
+        type?: string;
+        role?: string;
     }>;
     certifications: Array<{
         name: string;
@@ -131,5 +136,11 @@ export const profileService = {
         const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`);
         if (!response.ok) throw new Error('Failed to fetch from GitHub');
         return response.json();
+    },
+
+    // Mark message as read
+    markMessageAsRead: async (messageId: string): Promise<ContactMessage> => {
+        const response = await api.post(`/profile/messages/${messageId}/read`);
+        return response.data;
     }
 };

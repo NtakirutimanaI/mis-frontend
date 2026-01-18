@@ -14,6 +14,7 @@ const Contact: React.FC<ContactProps> = ({ profile }) => {
         phone: '',
         subject: '',
         message: '',
+        company: '',
     });
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
@@ -26,22 +27,54 @@ const Contact: React.FC<ContactProps> = ({ profile }) => {
         setStatus('loading');
 
         // Construct the payload expected by the backend
+        // Only include fields that have values (don't send empty strings)
         const payload: ContactMessage = {
             name: `${localData.firstName} ${localData.lastName}`.trim(),
             email: localData.email,
-            phone: localData.phone,
-            subject: localData.subject,
             message: localData.message,
-            company: '' // Optional
         };
 
+        // Add optional fields only if they have values
+        if (localData.phone && localData.phone.trim()) {
+            payload.phone = localData.phone.trim();
+        }
+        if (localData.subject && localData.subject.trim()) {
+            payload.subject = localData.subject.trim();
+        }
+        if (localData.company && localData.company.trim()) {
+            payload.company = localData.company.trim();
+        }
+
+        console.log('📧 Sending contact message...', payload);
+
         try {
-            await profileService.sendContactMessage(payload);
+            const response = await profileService.sendContactMessage(payload);
+            console.log('✅ Message sent successfully:', response);
             setStatus('success');
             // Reset form
-            setLocalData({ firstName: '', lastName: '', email: '', phone: '', subject: '', message: '' });
-        } catch {
+            setLocalData({ firstName: '', lastName: '', email: '', phone: '', subject: '', message: '', company: '' });
+
+            // Reset success message after 5 seconds
+            setTimeout(() => {
+                setStatus('idle');
+            }, 5000);
+        } catch (error: any) {
+            console.error('❌ Failed to send message:', error);
+            const errorDetails = {
+                message: error?.message,
+                status: error?.response?.status,
+                statusText: error?.response?.statusText,
+                data: error?.response?.data,
+                validationErrors: error?.response?.data?.message
+            };
+            console.error('Error details:', errorDetails);
+            (window as any).__lastContactError = errorDetails;
             setStatus('error');
+
+            // Reset error message after 5 seconds
+            setTimeout(() => {
+                setStatus('idle');
+            }, 5000);
         }
     };
 
@@ -102,8 +135,28 @@ const Contact: React.FC<ContactProps> = ({ profile }) => {
                                 {status === 'loading' ? 'Sending...' : 'Submit'}
                             </button>
 
-                            {status === 'success' && <p style={{ color: 'green', marginTop: '1rem' }}>Message sent successfully!</p>}
-                            {status === 'error' && <p style={{ color: 'red', marginTop: '1rem' }}>Failed to send message.</p>}
+                            {status === 'success' && (
+                                <p style={{ color: 'green', marginTop: '1rem', fontWeight: 600 }}>
+                                    ✅ Message sent successfully! I'll get back to you soon.
+                                </p>
+                            )}
+                            {status === 'error' && (
+                                <div style={{ marginTop: '1rem' }}>
+                                    <p style={{ color: 'red', fontWeight: 600 }}>
+                                        ❌ Failed to send message. Please check the following:
+                                    </p>
+                                    <pre style={{
+                                        background: '#fee',
+                                        padding: '1rem',
+                                        borderRadius: '4px',
+                                        fontSize: '0.85rem',
+                                        overflow: 'auto',
+                                        maxHeight: '200px'
+                                    }}>
+                                        {JSON.stringify((window as any).__lastContactError, null, 2)}
+                                    </pre>
+                                </div>
+                            )}
                         </form>
                     </div>
                 </div>

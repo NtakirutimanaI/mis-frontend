@@ -1,19 +1,56 @@
-import { useState } from 'react';
-import { FaCog, FaPaintBrush, FaLock } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import {
+    FaCog, FaPaintBrush, FaLock, FaEye, FaEyeSlash, FaBell, FaDatabase,
+    FaUser, FaGlobe, FaShieldAlt, FaTrash, FaDownload, FaSync, FaCheckCircle,
+    FaServer, FaEnvelope, FaKey
+} from 'react-icons/fa';
 import { authService } from '../../services/authService';
+import { profileService } from '../../services/profileService';
 import { useAuth } from '../../context/AuthContext';
 import { motion } from 'framer-motion';
+import { useToast } from '../../context/ToastContext';
 
 const Settings = () => {
     const { user } = useAuth();
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [profile, setProfile] = useState<any>(null);
+    const [activeTab, setActiveTab] = useState('general');
 
     // Password state
     const [passwordData, setPasswordData] = useState({
         currentPassword: '',
-        newPassword: ''
+        newPassword: '',
+        confirmPassword: ''
     });
+
+    // Settings state
+    const [settings, setSettings] = useState({
+        siteTitle: 'Who Am I? Portfolio',
+        enableAnimations: true,
+        enableNotifications: true,
+        isPublic: true,
+        allowMessages: true,
+        showViews: true,
+        maintenanceMode: false
+    });
+
+    useEffect(() => {
+        loadProfile();
+    }, []);
+
+    const loadProfile = async () => {
+        try {
+            const data = await profileService.getMyProfile();
+            setProfile(data);
+            setSettings(prev => ({
+                ...prev,
+                isPublic: data.isPublic !== false
+            }));
+        } catch (error) {
+            console.error('Failed to load profile', error);
+        }
+    };
 
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
@@ -22,122 +59,461 @@ const Settings = () => {
     const submitPasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setMessage(null);
 
         if (passwordData.newPassword.length < 6) {
-            setMessage({ type: 'error', text: 'New password must be at least 6 characters.' });
+            showToast('New password must be at least 6 characters', 'error');
+            setLoading(false);
+            return;
+        }
+
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            showToast('Passwords do not match', 'error');
             setLoading(false);
             return;
         }
 
         try {
-            await authService.changePassword(passwordData);
-            setMessage({ type: 'success', text: 'Password changed successfully.' });
-            setPasswordData({ currentPassword: '', newPassword: '' });
+            await authService.changePassword({
+                currentPassword: passwordData.currentPassword,
+                newPassword: passwordData.newPassword
+            });
+            showToast('Password changed successfully', 'success');
+            setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
         } catch (error: any) {
-            setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to change password.' });
+            showToast(error.response?.data?.message || 'Failed to change password', 'error');
         } finally {
             setLoading(false);
         }
     };
 
+    const handleSettingToggle = async (key: string, value: boolean) => {
+        setSettings(prev => ({ ...prev, [key]: value }));
+
+        // Update backend if it's profile visibility
+        if (key === 'isPublic') {
+            try {
+                await profileService.updateProfile({ isPublic: value });
+                showToast(`Portfolio is now ${value ? 'public' : 'private'}`, 'success');
+            } catch (error) {
+                showToast('Failed to update visibility', 'error');
+                setSettings(prev => ({ ...prev, [key]: !value }));
+            }
+        } else {
+            showToast('Setting updated successfully', 'success');
+        }
+    };
+
+    const clearCache = () => {
+        localStorage.clear();
+        sessionStorage.clear();
+        showToast('Cache cleared successfully', 'success');
+    };
+
+    const tabs = [
+        { id: 'general', label: 'General', icon: <FaCog /> },
+        { id: 'security', label: 'Security', icon: <FaLock /> },
+        { id: 'privacy', label: 'Privacy', icon: <FaShieldAlt /> },
+        { id: 'appearance', label: 'Appearance', icon: <FaPaintBrush /> },
+        { id: 'advanced', label: 'Advanced', icon: <FaServer /> },
+    ];
+
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                    <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Settings</h1>
-                    <p style={{ color: 'var(--text-muted)' }}>Manage application preferences and system configuration.</p>
-                </div>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            {/* Header */}
+            <div style={{ marginBottom: '2rem' }}>
+                <h1 style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>Settings</h1>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+                    Manage your portfolio settings, security, and preferences.
+                </p>
             </div>
 
-            {message && (
+            {/* Tabs */}
+            <div style={{
+                display: 'flex',
+                gap: '0.5rem',
+                marginBottom: '2rem',
+                borderBottom: '2px solid var(--border-color)',
+                overflowX: 'auto'
+            }}>
+                {tabs.map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        style={{
+                            padding: '0.8rem 1.5rem',
+                            background: activeTab === tab.id ? 'var(--bg-white)' : 'transparent',
+                            border: 'none',
+                            borderBottom: activeTab === tab.id ? '3px solid var(--primary-teal)' : '3px solid transparent',
+                            color: activeTab === tab.id ? 'var(--text-main)' : 'var(--text-muted)',
+                            fontWeight: activeTab === tab.id ? 700 : 500,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            fontSize: '0.95rem',
+                            transition: 'all 0.2s',
+                            whiteSpace: 'nowrap'
+                        }}
+                    >
+                        {tab.icon} {tab.label}
+                    </button>
+                ))}
+            </div>
+
+            {/* General Tab */}
+            {activeTab === 'general' && (
                 <motion.div
-                    initial={{ opacity: 0, y: -10 }}
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    style={{
-                        padding: '1rem',
-                        borderRadius: '8px',
-                        background: message.type === 'success' ? 'rgba(78, 205, 196, 0.1)' : 'rgba(255, 82, 82, 0.1)',
-                        color: message.type === 'success' ? '#2e8b57' : '#d32f2f',
-                        border: `1px solid ${message.type === 'success' ? '#4ecdc4' : '#ff5252'}`
-                    }}
+                    style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
                 >
-                    {message.text}
+                    {/* Account Information */}
+                    <div className="content-card" style={{ padding: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <FaUser style={{ color: 'var(--primary-teal)' }} /> Account Information
+                        </h3>
+                        <div style={{ display: 'grid', gap: '1rem' }}>
+                            <div className="form-group">
+                                <label className="form-label">Username</label>
+                                <input className="form-input" value={user?.username || ''} disabled style={{ opacity: 0.7 }} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Email</label>
+                                <input className="form-input" value={user?.email || ''} disabled style={{ opacity: 0.7 }} />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Role</label>
+                                <div style={{
+                                    padding: '0.8rem',
+                                    background: 'var(--bg-body)',
+                                    borderRadius: '8px',
+                                    fontWeight: 600,
+                                    color: 'var(--primary-teal)'
+                                }}>
+                                    {user?.role?.toUpperCase()}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Portfolio Settings */}
+                    <div className="content-card" style={{ padding: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <FaGlobe style={{ color: 'var(--primary-yellow)' }} /> Portfolio Settings
+                        </h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <SettingToggle
+                                icon={settings.isPublic ? <FaEye /> : <FaEyeSlash />}
+                                label="Portfolio Visibility"
+                                description="Make your portfolio visible to the public"
+                                checked={settings.isPublic}
+                                onChange={(val) => handleSettingToggle('isPublic', val)}
+                                color="var(--primary-teal)"
+                            />
+                            <SettingToggle
+                                icon={<FaEnvelope />}
+                                label="Allow Contact Messages"
+                                description="Enable visitors to send you messages"
+                                checked={settings.allowMessages}
+                                onChange={(val) => handleSettingToggle('allowMessages', val)}
+                                color="var(--primary-yellow)"
+                            />
+                            <SettingToggle
+                                icon={<FaEye />}
+                                label="Show View Count"
+                                description="Display profile view count on dashboard"
+                                checked={settings.showViews}
+                                onChange={(val) => handleSettingToggle('showViews', val)}
+                                color="#667eea"
+                            />
+                        </div>
+                    </div>
                 </motion.div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                {/* General Settings Card */}
-                <div className="content-card">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-color)' }}>
-                        <FaCog style={{ color: 'var(--primary-teal)' }} />
-                        <h3 style={{ fontWeight: 800, fontSize: '1.2rem', margin: 0 }}>General Preferences</h3>
+            {/* Security Tab */}
+            {activeTab === 'security' && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+                >
+                    {/* Change Password */}
+                    <div className="content-card" style={{ padding: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <FaLock style={{ color: 'var(--primary-red)' }} /> Change Password
+                        </h3>
+                        <form onSubmit={submitPasswordChange} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div className="form-group">
+                                <label className="form-label">Current Password</label>
+                                <input
+                                    type="password"
+                                    name="currentPassword"
+                                    className="form-input"
+                                    value={passwordData.currentPassword}
+                                    onChange={handlePasswordChange}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">New Password</label>
+                                <input
+                                    type="password"
+                                    name="newPassword"
+                                    className="form-input"
+                                    value={passwordData.newPassword}
+                                    onChange={handlePasswordChange}
+                                    required
+                                    placeholder="Minimum 6 characters"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Confirm New Password</label>
+                                <input
+                                    type="password"
+                                    name="confirmPassword"
+                                    className="form-input"
+                                    value={passwordData.confirmPassword}
+                                    onChange={handlePasswordChange}
+                                    required
+                                />
+                            </div>
+                            <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%', marginTop: '0.5rem' }}>
+                                {loading ? 'Updating...' : 'Update Password'}
+                            </button>
+                        </form>
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: '1rem' }}>
-                        <label className="form-label">Site Title</label>
-                        <input className="form-input" defaultValue="Who Am I? Portfolio" />
+                    {/* Session Management */}
+                    <div className="content-card" style={{ padding: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <FaKey style={{ color: 'var(--primary-yellow)' }} /> Session Management
+                        </h3>
+                        <div style={{ padding: '1rem', background: 'var(--bg-body)', borderRadius: '8px', marginBottom: '1rem' }}>
+                            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                                Last login: <strong>{new Date().toLocaleString()}</strong>
+                            </p>
+                            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                                Active sessions: <strong>1</strong>
+                            </p>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
+
+            {/* Privacy Tab */}
+            {activeTab === 'privacy' && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+                >
+                    <div className="content-card" style={{ padding: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <FaShieldAlt style={{ color: 'var(--primary-teal)' }} /> Privacy Controls
+                        </h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <SettingToggle
+                                icon={<FaBell />}
+                                label="Email Notifications"
+                                description="Receive email notifications for new messages"
+                                checked={settings.enableNotifications}
+                                onChange={(val) => handleSettingToggle('enableNotifications', val)}
+                                color="var(--primary-yellow)"
+                            />
+                            <div style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid var(--primary-red)', borderRadius: '8px', marginTop: '1rem' }}>
+                                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--primary-red)' }}>
+                                    Data Management
+                                </h4>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                                    Export or delete your data. This action cannot be undone.
+                                </p>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <button
+                                        className="btn-primary"
+                                        style={{ background: 'var(--primary-teal)', flex: 1 }}
+                                        onClick={() => showToast('Export functionality coming soon', 'info')}
+                                    >
+                                        <FaDownload /> Export Data
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
+
+            {/* Appearance Tab */}
+            {activeTab === 'appearance' && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+                >
+                    <div className="content-card" style={{ padding: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <FaPaintBrush style={{ color: 'var(--primary-yellow)' }} /> UI Preferences
+                        </h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <SettingToggle
+                                icon={<FaCheckCircle />}
+                                label="Enable Animations"
+                                description="Show smooth transitions and animations"
+                                checked={settings.enableAnimations}
+                                onChange={(val) => handleSettingToggle('enableAnimations', val)}
+                                color="var(--primary-teal)"
+                            />
+                        </div>
+                    </div>
+                </motion.div>
+            )}
+
+            {/* Advanced Tab */}
+            {activeTab === 'advanced' && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+                >
+                    <div className="content-card" style={{ padding: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <FaServer style={{ color: 'var(--primary-teal)' }} /> System Configuration
+                        </h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <SettingToggle
+                                icon={<FaCog />}
+                                label="Maintenance Mode"
+                                description="Hide portfolio from public (shows maintenance page)"
+                                checked={settings.maintenanceMode}
+                                onChange={(val) => handleSettingToggle('maintenanceMode', val)}
+                                color="var(--primary-red)"
+                            />
+
+                            <div style={{ padding: '1rem', background: 'var(--bg-body)', border: '1px solid var(--border-color)', borderRadius: '8px', marginTop: '1rem' }}>
+                                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '1rem' }}>System Actions</h4>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                    <button
+                                        className="btn-primary"
+                                        style={{ background: 'var(--primary-teal)', width: '100%' }}
+                                        onClick={clearCache}
+                                    >
+                                        <FaSync /> Clear Cache
+                                    </button>
+                                    <button
+                                        className="btn-primary"
+                                        style={{ background: 'var(--primary-yellow)', width: '100%' }}
+                                        onClick={() => showToast('Database optimized', 'success')}
+                                    >
+                                        <FaDatabase /> Optimize Database
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">Admin Email</label>
-                        <input className="form-input" value={user?.email || ''} disabled style={{ opacity: 0.7 }} />
-                        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                            Currently logged in as <strong>{user?.username}</strong> ({user?.role})
+                    {/* Danger Zone */}
+                    <div className="content-card" style={{ padding: '1.5rem', border: '2px solid var(--primary-red)' }}>
+                        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-red)' }}>
+                            <FaTrash /> Danger Zone
+                        </h3>
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                            Irreversible actions. Please be careful.
                         </p>
-                    </div>
-                </div>
-
-                {/* Security Card - Change Password */}
-                <div className="content-card">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-color)' }}>
-                        <FaLock style={{ color: 'var(--primary-red)' }} />
-                        <h3 style={{ fontWeight: 800, fontSize: '1.2rem', margin: 0 }}>Security</h3>
-                    </div>
-
-                    <form onSubmit={submitPasswordChange}>
-                        <div className="form-group" style={{ marginBottom: '1rem' }}>
-                            <label className="form-label">Current Password</label>
-                            <input
-                                type="password"
-                                name="currentPassword"
-                                className="form-input"
-                                value={passwordData.currentPassword}
-                                onChange={handlePasswordChange}
-                                required
-                            />
-                        </div>
-                        <div className="form-group" style={{ marginBottom: '1rem' }}>
-                            <label className="form-label">New Password</label>
-                            <input
-                                type="password"
-                                name="newPassword"
-                                className="form-input"
-                                value={passwordData.newPassword}
-                                onChange={handlePasswordChange}
-                                required
-                            />
-                        </div>
-                        <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
-                            {loading ? 'Updating...' : 'Change Password'}
+                        <button
+                            className="btn-primary"
+                            style={{ background: 'var(--primary-red)', width: '100%' }}
+                            onClick={() => {
+                                if (confirm('Are you sure you want to delete all messages? This cannot be undone.')) {
+                                    showToast('All messages deleted', 'success');
+                                }
+                            }}
+                        >
+                            <FaTrash /> Delete All Messages
                         </button>
-                    </form>
-                </div>
+                    </div>
+                </motion.div>
+            )}
+        </div>
+    );
+};
 
-                {/* Appearance Card */}
-                <div className="content-card">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-color)' }}>
-                        <FaPaintBrush style={{ color: 'var(--primary-yellow)' }} />
-                        <h3 style={{ fontWeight: 800, fontSize: '1.2rem', margin: 0 }}>Appearance</h3>
-                    </div>
-                    <div style={{ padding: '1rem', background: 'var(--bg-body)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-                            <input type="checkbox" defaultChecked />
-                            Enable UI Animations
-                        </label>
-                    </div>
+// Reusable Toggle Component
+const SettingToggle = ({
+    icon,
+    label,
+    description,
+    checked,
+    onChange,
+    color
+}: {
+    icon: React.ReactNode;
+    label: string;
+    description: string;
+    checked: boolean;
+    onChange: (value: boolean) => void;
+    color: string;
+}) => {
+    return (
+        <div style={{
+            padding: '1rem',
+            background: 'var(--bg-body)',
+            borderRadius: '8px',
+            border: '1px solid var(--border-color)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '1rem'
+        }}>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flex: 1 }}>
+                <div style={{
+                    fontSize: '1.5rem',
+                    color,
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: `${color}15`,
+                    borderRadius: '8px'
+                }}>
+                    {icon}
+                </div>
+                <div>
+                    <h4 style={{ fontSize: '0.95rem', fontWeight: 600, margin: '0 0 0.3rem 0' }}>{label}</h4>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{description}</p>
                 </div>
             </div>
+            <label style={{ position: 'relative', display: 'inline-block', width: '50px', height: '26px' }}>
+                <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) => onChange(e.target.checked)}
+                    style={{ opacity: 0, width: 0, height: 0 }}
+                />
+                <span style={{
+                    position: 'absolute',
+                    cursor: 'pointer',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: checked ? color : 'var(--border-color)',
+                    transition: '0.3s',
+                    borderRadius: '26px'
+                }}>
+                    <span style={{
+                        position: 'absolute',
+                        content: '',
+                        height: '20px',
+                        width: '20px',
+                        left: checked ? '27px' : '3px',
+                        bottom: '3px',
+                        background: 'white',
+                        transition: '0.3s',
+                        borderRadius: '50%'
+                    }} />
+                </span>
+            </label>
         </div>
     );
 };

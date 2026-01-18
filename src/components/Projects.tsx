@@ -6,7 +6,8 @@ interface ProjectsProps {
 
 const Projects: React.FC<ProjectsProps> = ({ profile }) => {
     const projects = profile.projects || [];
-    const displayProjects = projects.filter(p => p.published !== false);
+    // Show only explicitly published projects
+    const displayProjects = projects.filter(p => p.published === true);
 
     return (
         <section className="section" id="projects">
@@ -20,8 +21,32 @@ const Projects: React.FC<ProjectsProps> = ({ profile }) => {
                         <div key={index} className="project-item">
                             <div className="project-text">
                                 <h3 className="project-name">{project.name}</h3>
+
+                                {/* Type and Role on same row */}
+                                {(project.type || project.role) && (
+                                    <div style={{
+                                        display: 'flex',
+                                        gap: '1.5rem',
+                                        marginTop: '0.5rem',
+                                        marginBottom: '1rem',
+                                        fontSize: '0.9rem',
+                                        color: 'var(--text-muted)'
+                                    }}>
+                                        {project.type && (
+                                            <span>
+                                                <strong style={{ color: 'var(--text-main)' }}>Type:</strong> {project.type}
+                                            </span>
+                                        )}
+                                        {project.role && (
+                                            <span>
+                                                <strong style={{ color: 'var(--text-main)' }}>Role:</strong> {project.role}
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+
                                 <p className="project-desc-text">
-                                    {project.description || "I'm a paragraph. Click here to add your own text and edit me. It's easy. Just click “Edit Text” or double click me to add your own content and make changes to the font."}
+                                    {project.description || "I'm a paragraph. Click here to add your own text and edit me. It's easy. Just click \"Edit Text\" or double click me to add your own content and make changes to the font."}
                                 </p>
                                 {project.url && (
                                     <a href={project.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline', fontWeight: 700 }}>

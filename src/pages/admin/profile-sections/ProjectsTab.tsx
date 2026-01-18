@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaGithub, FaGlobe } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes, FaGithub, FaGlobe, FaUpload } from 'react-icons/fa';
 import type { Profile } from '../../../services/profileService';
 import { profileService } from '../../../services/profileService';
 
@@ -24,7 +24,29 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ profile, onUpdate, searchQuer
     const [githubRepos, setGithubRepos] = useState<any[]>([]);
     const [loadingGithub, setLoadingGithub] = useState(false);
 
+    // Image Upload Ref
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const categories = ['Backend', 'Frontend', 'UI/UX', 'Fullstack', 'Other'];
+
+    // Handle image file upload
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            // Check file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Image must be smaller than 2MB');
+                return;
+            }
+
+            // Convert to base64
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setEditForm((prev: any) => ({ ...prev, imageUrl: reader.result as string }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const filteredProjects = projects.filter((p: any) => {
         const matchesCategory = filter === 'All' || p.category === filter;
@@ -74,7 +96,9 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ profile, onUpdate, searchQuer
             featured: false,
             category: 'Other',
             effectiveness: 50, // Default start
-            published: false
+            published: false,
+            type: 'Open Source',
+            role: 'Developer'
         });
         setEditingIndex(-1); // New item logic
         setShowGithubImport(false);
@@ -93,7 +117,9 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ profile, onUpdate, searchQuer
             featured: false,
             category: 'Other',
             effectiveness: 0,
-            published: false
+            published: false,
+            type: '',
+            role: ''
         });
     };
 
@@ -130,16 +156,39 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ profile, onUpdate, searchQuer
             updatedProjects[editingIndex] = editForm;
         }
 
+        console.log('Attempting to save project...', { editForm, updatedProjects });
+
         try {
-            const updatedProfile = { ...profile, projects: updatedProjects };
-            const result = await profileService.updateProfile(updatedProfile);
+            // Only send the projects array to avoid validation issues
+            console.log('Sending update request...');
+            const result = await profileService.updateProfile({ projects: updatedProjects });
+            console.log('Update successful:', result);
             setProjects(result.projects);
             onUpdate(result);
             cancelEdit();
-        } catch (error) {
-            console.error('Failed to save project', error);
-            alert('Failed to save project');
+
+            // Show success message
+            alert('✅ Project Saved');
+        } catch (error: any) {
+            console.error('SAVE ERROR:', error);
+            console.error('Error details:', {
+                message: error?.message,
+                response: error?.response,
+                status: error?.response?.status,
+                data: error?.response?.data
+            });
+
+            // More detailed error message
+            const errorMessage = error?.response?.data?.message || error?.message || 'Failed to save project';
+            if (error?.response?.data?.errors) {
+                console.error('Validation errors:', error.response.data.errors);
+            }
+            if (error?.response?.data?.message) {
+                console.error('Server message:', error.response.data.message);
+            }
+            alert(`❌ Failed to save project: ${errorMessage}`);
         } finally {
+            console.log('Resetting loading state...');
             setLoading(false);
         }
     };
@@ -150,13 +199,17 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ profile, onUpdate, searchQuer
         const updatedProjects = projects.filter((_: any, i: number) => i !== index);
 
         try {
-            const updatedProfile = { ...profile, projects: updatedProjects };
-            const result = await profileService.updateProfile(updatedProfile);
+            // Only send the projects array
+            const result = await profileService.updateProfile({ projects: updatedProjects });
             setProjects(result.projects);
             onUpdate(result);
-        } catch (error) {
-            console.error(error);
-            alert('Failed to delete');
+
+            // Show success message
+            alert('✅ Project Deleted');
+        } catch (error: any) {
+            console.error('Failed to delete project', error);
+            const errorMessage = error?.response?.data?.message || error?.message || 'Failed to delete project';
+            alert(`❌ Failed to delete project: ${errorMessage}`);
         } finally {
             setLoading(false);
         }
@@ -279,6 +332,29 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ profile, onUpdate, searchQuer
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                             <div className="form-group">
+                                <label className="form-label">Type</label>
+                                <input
+                                    name="type"
+                                    value={editForm.type || ''}
+                                    onChange={handleFormChange}
+                                    className="form-input"
+                                    placeholder="e.g., Client Project, Personal, Open Source"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Role</label>
+                                <input
+                                    name="role"
+                                    value={editForm.role || ''}
+                                    onChange={handleFormChange}
+                                    className="form-input"
+                                    placeholder="e.g., Lead Developer, Solo Developer"
+                                />
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                            <div className="form-group">
                                 <label className="form-label">Live URL</label>
                                 <input name="url" value={editForm.url || ''} onChange={handleFormChange} className="form-input" />
                             </div>
@@ -289,8 +365,88 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ profile, onUpdate, searchQuer
                         </div>
 
                         <div className="form-group">
-                            <label className="form-label">Image URL</label>
-                            <input name="imageUrl" value={editForm.imageUrl || ''} onChange={handleFormChange} className="form-input" placeholder="https://example.com/image.jpg" />
+                            <label className="form-label">Project Image</label>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleImageUpload}
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                            />
+
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                {/* Image Preview */}
+                                {editForm.imageUrl && (
+                                    <div style={{
+                                        width: '80px',
+                                        height: '80px',
+                                        borderRadius: '8px',
+                                        overflow: 'hidden',
+                                        flexShrink: 0,
+                                        border: '2px solid var(--border-color)'
+                                    }}>
+                                        <img
+                                            src={editForm.imageUrl}
+                                            alt="Preview"
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150?text=Error'; }}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Upload/Replace Button */}
+                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="admin-icon-btn"
+                                        style={{
+                                            width: 'auto',
+                                            padding: '0.6rem 1rem',
+                                            gap: '8px',
+                                            fontSize: '0.85rem',
+                                            borderRadius: '8px',
+                                            border: '1px solid var(--border-color)',
+                                            background: editForm.imageUrl ? 'var(--primary-yellow)' : 'transparent',
+                                            color: editForm.imageUrl ? '#000' : 'inherit'
+                                        }}
+                                    >
+                                        <FaUpload /> {editForm.imageUrl ? 'Replace Image' : 'Upload from PC'}
+                                    </button>
+
+                                    {/* Remove Image Button */}
+                                    {editForm.imageUrl && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setEditForm((prev: any) => ({ ...prev, imageUrl: '' }))}
+                                            className="admin-icon-btn"
+                                            style={{
+                                                width: 'auto',
+                                                padding: '0.6rem 1rem',
+                                                gap: '8px',
+                                                fontSize: '0.85rem',
+                                                borderRadius: '8px',
+                                                border: '1px solid var(--primary-red)',
+                                                color: 'var(--primary-red)'
+                                            }}
+                                        >
+                                            <FaTimes /> Remove Image
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* URL Input */}
+                            <input
+                                name="imageUrl"
+                                value={editForm.imageUrl || ''}
+                                onChange={handleFormChange}
+                                className="form-input"
+                                placeholder="Or paste image URL: https://example.com/image.jpg"
+                            />
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                                Upload an image from your PC (max 2MB) or paste a direct URL
+                            </p>
                         </div>
 
                         <div className="form-group">

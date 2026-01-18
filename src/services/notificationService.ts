@@ -1,7 +1,4 @@
-
-import axios from 'axios';
-
-const API_URL = 'http://localhost:3000/api/notifications';
+import api from './api';
 
 export interface Notification {
     id: string;
@@ -17,40 +14,25 @@ export interface Notification {
 
 export const notificationService = {
     getAll: async (): Promise<Notification[]> => {
-        const token = localStorage.getItem('access_token');
-        const response = await axios.get(API_URL, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get('/notifications');
         return response.data;
     },
 
     getUnread: async (): Promise<Notification[]> => {
-        const token = localStorage.getItem('access_token');
-        const response = await axios.get(`${API_URL}/unread`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get('/notifications/unread');
         return response.data;
     },
 
     markAsRead: async (id: string): Promise<Notification> => {
-        const token = localStorage.getItem('access_token');
-        const response = await axios.patch(`${API_URL}/${id}/read`, {}, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.patch(`/notifications/${id}/read`);
         return response.data;
     },
 
     markAllAsRead: async (): Promise<void> => {
-        const token = localStorage.getItem('access_token');
-        await axios.patch(`${API_URL}/read-all`, {}, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        await api.patch('/notifications/read-all');
     },
 
     delete: async (id: string): Promise<void> => {
-        const token = localStorage.getItem('access_token');
-        await axios.delete(`${API_URL}/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        await api.delete(`/notifications/${id}`);
     }
 };
