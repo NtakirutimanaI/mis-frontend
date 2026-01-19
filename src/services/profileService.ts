@@ -29,6 +29,13 @@ export interface Profile {
     yearsOfExperience: number;
     availableForHire: boolean;
     isPublic: boolean;
+    allowMessages?: boolean;
+    showViews?: boolean;
+    maintenanceMode?: boolean;
+    preferences?: {
+        enableAnimations?: boolean;
+        enableNotifications?: boolean;
+    };
     poweredBy?: string;
     education: Array<{
         degree: string;
@@ -138,9 +145,13 @@ export const profileService = {
         return response.json();
     },
 
-    // Mark message as read
     markMessageAsRead: async (messageId: string): Promise<ContactMessage> => {
         const response = await api.post(`/profile/messages/${messageId}/read`);
         return response.data;
+    },
+
+    // Delete all messages
+    deleteAllMessages: async (): Promise<void> => {
+        await api.delete('/profile/messages');
     }
 };

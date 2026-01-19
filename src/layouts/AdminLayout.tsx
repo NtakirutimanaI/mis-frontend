@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -5,14 +6,19 @@ import {
     FaSearch, FaPlus, FaBell, FaDatabase, FaMoon, FaSun,
     FaCheck, FaTrash, FaTimes, FaProjectDiagram, FaBars, FaGlobe
 } from 'react-icons/fa';
-import { useState, useEffect, useRef } from 'react';
-import { notificationService, type Notification } from '../services/notificationService';
-import { profileService, type ContactMessage } from '../services/profileService';
+import { useNotification } from '../context/NotificationContext';
+import { profileService, type Profile, type ContactMessage } from '../services/profileService';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const AdminLayout = () => {
     const { logout, user } = useAuth();
     const location = useLocation();
+
+    // Use notification context
+    const { notifications, unreadCount, fetchNotifications, markAsRead, deleteNotification, showNotifications, setShowNotifications } = useNotification();
+
+    // Profile preferences for notification settings
+    const [profilePrefs, setProfilePrefs] = useState<Profile | null>(null);
 
     // Header State with Persistence
     const [searchQuery, setSearchQuery] = useState('');
@@ -22,16 +28,14 @@ const AdminLayout = () => {
         return savedTheme === 'dark';
     });
 
-    // Notification State
-    const [notifications, setNotifications] = useState<Notification[]>([]);
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [showNotifications, setShowNotifications] = useState(false);
+    // Other UI state
     const [showAddMenu, setShowAddMenu] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const notifRef = useRef<HTMLDivElement>(null);
     const addMenuRef = useRef<HTMLDivElement>(null);
     const profileMenuRef = useRef<HTMLDivElement>(null);
+
 
     // Messages State
     const [messages, setMessages] = useState<ContactMessage[]>([]);
@@ -44,23 +48,12 @@ const AdminLayout = () => {
         localStorage.setItem('adminTheme', isDark ? 'dark' : 'light');
     }, [isDark]);
 
-    // Fetch Notifications
+    // Fetch Notifications using context
     useEffect(() => {
-        const fetchNotifications = async () => {
-            try {
-                const data = await notificationService.getAll();
-                setNotifications(data);
-                setUnreadCount(data.filter(n => !n.isRead).length);
-            } catch (error) {
-                console.error("Failed to load notifications", error);
-            }
-        };
         fetchNotifications();
-
-        // Poll every minute
         const interval = setInterval(fetchNotifications, 60000);
         return () => clearInterval(interval);
-    }, []);
+    }, [fetchNotifications]);
 
     // Fetch Messages
     useEffect(() => {
@@ -102,26 +95,26 @@ const AdminLayout = () => {
         };
     }, []);
 
-    // Toggle Notifications
-    const toggleNotifications = () => setShowNotifications(!showNotifications);
+    // Load profile preferences for notification settings
+    useEffect(() => {
+        const loadPrefs = async () => {
+            try {
+                const data = await profileService.getMyProfile();
+                setProfilePrefs(data);
+            } catch (e) {
+                console.error('Failed to load profile preferences', e);
+            }
+        };
+        loadPrefs();
+    }, []);
 
-    const markAsRead = async (id: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        try {
-            await notificationService.markAsRead(id);
-            setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-            setUnreadCount(prev => Math.max(0, prev - 1));
-        } catch (e) { console.error(e); }
-    };
-
-    const deleteNotification = async (id: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        try {
-            await notificationService.delete(id);
-            const isUnread = notifications.find(n => n.id === id)?.isRead === false;
-            setNotifications(prev => prev.filter(n => n.id !== id));
-            if (isUnread) setUnreadCount(prev => Math.max(0, prev - 1));
-        } catch (e) { console.error(e); }
+    // Handle notification toggle respecting user preferences
+    const handleToggleNotifications = () => {
+        if (profilePrefs?.preferences?.enableNotifications === false) {
+            // Notifications disabled in settings - don't show dropdown
+            return;
+        }
+        setShowNotifications(!showNotifications);
     };
 
     const navItems = [
@@ -338,7 +331,7 @@ const AdminLayout = () => {
                     </div>
 
                     <div style={{ position: 'relative' }} ref={notifRef}>
-                        <button className="admin-icon-btn" title="Notifications" onClick={toggleNotifications}>
+                        <button className="admin-icon-btn" title="Notifications" onClick={handleToggleNotifications}>
                             <FaBell />
                             {unreadCount > 0 && <span className="admin-badge">{unreadCount}</span>}
                         </button>

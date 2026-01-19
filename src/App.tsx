@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { NotificationProvider } from './context/NotificationContext';
 import PublicLayout from './layouts/PublicLayout';
 import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -57,33 +58,35 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
-          <Routes>
-            {/* Public Routes */}
-            <Route element={<PublicLayout profile={profile} />}>
-              <Route path="/" element={<Home />} />
-            </Route>
-
-            {/* Auth Routes */}
-            <Route path="/login" element={<Login />} />
-
-            {/* Admin Routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route element={<AdminLayout />}>
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/profile" element={<ProfileManagement />} />
-                {/* Projects is now part of Profile Management */}
-                <Route path="/admin/projects" element={<Navigate to="/admin/profile" replace />} />
-                <Route path="/admin/api-docs" element={<ApiDocs />} />
-                <Route path="/admin/messages" element={<Messages />} />
-                <Route path="/admin/resources" element={<Resources />} />
-                <Route path="/admin/footer-settings" element={<FooterSettings />} />
-                <Route path="/admin/settings" element={<Settings />} />
+          <NotificationProvider>
+            <Routes>
+              {/* Public Routes */}
+              <Route element={<PublicLayout profile={profile} />}>
+                <Route path="/" element={<Home />} />
               </Route>
-            </Route>
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+              {/* Auth Routes */}
+              <Route path="/login" element={<Login />} />
+
+              {/* Admin Routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route element={<AdminLayout />}>
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/admin/profile" element={<ProfileManagement />} />
+                  {/* Projects is now part of Profile Management */}
+                  <Route path="/admin/projects" element={<Navigate to="/admin/profile" replace />} />
+                  <Route path="/admin/api-docs" element={<ApiDocs />} />
+                  <Route path="/admin/messages" element={<Messages />} />
+                  <Route path="/admin/resources" element={<Resources />} />
+                  <Route path="/admin/footer-settings" element={<FooterSettings />} />
+                  <Route path="/admin/settings" element={<Settings />} />
+                </Route>
+              </Route>
+
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </NotificationProvider>
         </ToastProvider>
       </AuthProvider>
     </BrowserRouter>

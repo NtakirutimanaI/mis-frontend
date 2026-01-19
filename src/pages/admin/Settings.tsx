@@ -45,7 +45,12 @@ const Settings = () => {
             setProfile(data);
             setSettings(prev => ({
                 ...prev,
-                isPublic: data.isPublic !== false
+                isPublic: data.isPublic !== false,
+                allowMessages: data.allowMessages !== false,
+                showViews: data.showViews !== false,
+                maintenanceMode: data.maintenanceMode || false,
+                enableAnimations: data.preferences?.enableAnimations !== false,
+                enableNotifications: data.preferences?.enableNotifications !== false,
             }));
         } catch (error) {
             console.error('Failed to load profile', error);
@@ -87,25 +92,46 @@ const Settings = () => {
     };
 
     const handleSettingToggle = async (key: string, value: boolean) => {
+        // Optimistic update
         setSettings(prev => ({ ...prev, [key]: value }));
 
-        // Update backend if it's profile visibility
-        if (key === 'isPublic') {
-            try {
-                await profileService.updateProfile({ isPublic: value });
-                showToast(`Portfolio is now ${value ? 'public' : 'private'}`, 'success');
-            } catch (error) {
-                showToast('Failed to update visibility', 'error');
-                setSettings(prev => ({ ...prev, [key]: !value }));
+        try {
+            const updateData: any = {};
+
+            // Map simple boolean fields
+            if (['isPublic', 'allowMessages', 'showViews', 'maintenanceMode'].includes(key)) {
+                updateData[key] = value;
             }
-        } else {
-            showToast('Setting updated successfully', 'success');
+            // Map preferences fields
+            else if (['enableAnimations', 'enableNotifications'].includes(key)) {
+                updateData.preferences = {
+                    ...profile?.preferences,
+                    [key]: value
+                };
+            }
+
+            if (Object.keys(updateData).length > 0) {
+                const updatedProfile = await profileService.updateProfile(updateData);
+                setProfile(updatedProfile); // Update local profile state to keep in sync
+                showToast('Setting updated successfully', 'success');
+            }
+        } catch (error) {
+            showToast('Failed to update setting', 'error');
+            // Revert on error
+            setSettings(prev => ({ ...prev, [key]: !value }));
         }
     };
 
     const clearCache = () => {
+        const token = localStorage.getItem('accessToken');
+        const user = localStorage.getItem('user');
+
         localStorage.clear();
         sessionStorage.clear();
+
+        if (token) localStorage.setItem('accessToken', token);
+        if (user) localStorage.setItem('user', user);
+
         showToast('Cache cleared successfully', 'success');
     };
 
@@ -422,9 +448,14 @@ const Settings = () => {
                         <button
                             className="btn-primary"
                             style={{ background: 'var(--primary-red)', width: '100%' }}
-                            onClick={() => {
+                            onClick={async () => {
                                 if (confirm('Are you sure you want to delete all messages? This cannot be undone.')) {
-                                    showToast('All messages deleted', 'success');
+                                    try {
+                                        await profileService.deleteAllMessages();
+                                        showToast('All messages deleted', 'success');
+                                    } catch (error) {
+                                        showToast('Failed to delete messages', 'error');
+                                    }
                                 }
                             }}
                         >
@@ -454,16 +485,26 @@ const SettingToggle = ({
     color: string;
 }) => {
     return (
-        <div style={{
-            padding: '1rem',
-            background: 'var(--bg-body)',
-            borderRadius: '8px',
-            border: '1px solid var(--border-color)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: '1rem'
-        }}>
+        <div
+            onClick={() => onChange(!checked)}
+            role="switch"
+            aria-checked={checked}
+            style={{
+                padding: '1rem',
+                background: 'var(--bg-body)',
+                borderRadius: '8px',
+                border: '1px solid var(--border-color)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '1rem',
+                cursor: 'pointer',
+                userSelect: 'none',
+                transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = color}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
+        >
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flex: 1 }}>
                 <div style={{
                     fontSize: '1.5rem',
@@ -483,37 +524,31 @@ const SettingToggle = ({
                     <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{description}</p>
                 </div>
             </div>
-            <label style={{ position: 'relative', display: 'inline-block', width: '50px', height: '26px' }}>
-                <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={(e) => onChange(e.target.checked)}
-                    style={{ opacity: 0, width: 0, height: 0 }}
-                />
-                <span style={{
+
+            <div style={{ position: 'relative', width: '50px', height: '26px' }}>
+                <div style={{
                     position: 'absolute',
-                    cursor: 'pointer',
                     top: 0,
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: checked ? color : 'var(--border-color)',
+                    background: checked ? color : '#e2e8f0',
                     transition: '0.3s',
-                    borderRadius: '26px'
+                    borderRadius: '26px',
                 }}>
-                    <span style={{
+                    <div style={{
                         position: 'absolute',
-                        content: '',
                         height: '20px',
                         width: '20px',
                         left: checked ? '27px' : '3px',
                         bottom: '3px',
                         background: 'white',
                         transition: '0.3s',
-                        borderRadius: '50%'
+                        borderRadius: '50%',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                     }} />
-                </span>
-            </label>
+                </div>
+            </div>
         </div>
     );
 };
