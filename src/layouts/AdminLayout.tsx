@@ -390,17 +390,23 @@ const AdminLayout = () => {
                                                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                                         {!n.isRead && (
                                                             <button
-                                                                onClick={(e) => markAsRead(n.id, e)}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    markAsRead(n.id);
+                                                                }}
                                                                 title="Mark as Read"
-                                                                style={{ fontSize: '0.8rem', color: 'var(--primary-teal)', background: 'transparent', padding: '2px' }}
+                                                                style={{ fontSize: '0.8rem', color: 'var(--primary-teal)', background: 'transparent', padding: '2px', border: 'none', cursor: 'pointer' }}
                                                             >
                                                                 <FaCheck />
                                                             </button>
                                                         )}
                                                         <button
-                                                            onClick={(e) => deleteNotification(n.id, e)}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                deleteNotification(n.id);
+                                                            }}
                                                             title="Delete"
-                                                            style={{ fontSize: '0.8rem', color: 'var(--primary-red)', background: 'transparent', padding: '2px' }}
+                                                            style={{ fontSize: '0.8rem', color: 'var(--primary-red)', background: 'transparent', padding: '2px', border: 'none', cursor: 'pointer' }}
                                                         >
                                                             <FaTrash />
                                                         </button>
