@@ -10,13 +10,14 @@ const Experience: React.FC<ExperienceProps> = ({ profile }) => {
         return `${d.getFullYear()}`; // Just year like the template
     };
 
-    const skillCategories = Object.keys(profile.skills);
-
     return (
         <section className="section" id="resume">
             <div className="container">
                 <div style={{ marginBottom: '4rem' }}>
                     <h1 style={{ fontSize: '3rem', fontWeight: 800 }}>Resume</h1>
+                    <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                        {profile.yearsOfExperience} years of experience as {profile.title}
+                    </p>
                 </div>
 
                 {/* Work Experience */}
@@ -36,6 +37,32 @@ const Experience: React.FC<ExperienceProps> = ({ profile }) => {
                                 </div>
                             </div>
                         ))}
+                    </div>
+                </div>
+
+                {/* Stacks Used */}
+                <div className="resume-section" style={{ borderTop: '1px solid #e0e0e0', paddingTop: '4rem' }}>
+                    <div className="resume-title">Technical<br />Skills</div>
+                    <div className="resume-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
+                        {Object.entries(profile.skills || {}).filter(([category]) =>
+                            !['other'].includes(category)
+                        ).map(([category, skills]) => (
+                            <div key={category} style={{ background: 'var(--bg-white)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                                <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem', textTransform: 'capitalize', color: 'var(--primary-teal)' }}>
+                                    {category.replace(/-/g, ' ')}
+                                </h3>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                    {(skills || []).map(skill => (
+                                        <span key={skill} style={{ background: 'var(--bg-body)', border: '1px solid var(--border-color)', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 500 }}>
+                                            {skill}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                        {Object.keys(profile.skills || {}).length === 0 && (
+                            <p style={{ color: 'var(--text-muted)', gridColumn: '1 / -1' }}>No skills added yet.</p>
+                        )}
                     </div>
                 </div>
 
@@ -61,26 +88,7 @@ const Experience: React.FC<ExperienceProps> = ({ profile }) => {
                     </div>
                 )}
 
-                <div style={{ height: '4rem' }}></div>
 
-                {/* Skills & Expertise */}
-                <div className="resume-section" style={{ borderTop: '1px solid #e0e0e0', paddingTop: '4rem' }}>
-                    <div className="resume-title">Skills<br />& Expertise</div>
-                    <div className="resume-list" style={{ gap: '2rem' }}>
-                        {skillCategories.map((cat) => (
-                            <div key={cat} className="resume-item" style={{ gridTemplateColumns: '150px 1fr' }}>
-                                <div className="resume-date" style={{ textTransform: 'capitalize', fontWeight: 700 }}>
-                                    {cat}
-                                </div>
-                                <div className="resume-content">
-                                    <p className="resume-desc" style={{ lineHeight: '1.8' }}>
-                                        {profile.skills[cat].join('  •  ')}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
             </div>
         </section>
     );

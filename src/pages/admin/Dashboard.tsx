@@ -1,415 +1,253 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import {
-    FaEye, FaEnvelope, FaProjectDiagram, FaUserTie, FaCode, FaGraduationCap,
-    FaBriefcase, FaCertificate, FaGlobe, FaChartLine, FaArrowRight
-} from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import {
+    FaProjectDiagram, FaCode, FaCertificate, FaLanguage, FaBriefcase, FaGraduationCap,
+    FaEnvelope, FaEye, FaUser, FaBuilding, FaGlobeAfrica,
+    FaArrowRight, FaMapMarkerAlt, FaClock, FaChartLine
+} from 'react-icons/fa';
 import { profileService } from '../../services/profileService';
 import type { Profile } from '../../services/profileService';
 import Loading from '../../components/Loading';
 
-const AdminDashboard = () => {
-    const [statsData, setStatsData] = useState({
-        views: 0,
-        messages: 0,
-        projects: 0,
-        clients: 0,
-        skills: 0
-    });
+interface Stats {
+    projects: number;
+    skills: number;
+    messages: number;
+    unreadMessages: number;
+    certifications: number;
+    experience: number;
+    education: number;
+    languages: number;
+    views: number;
+    clients: number;
+}
 
+interface VisitorStats {
+    total: number;
+    last30Days: number;
+    last7Days: number;
+    today: number;
+    companies: { company: string; count: number }[];
+    locations: { location: string; count: number }[];
+    pages: { page: string; count: number }[];
+}
+
+const AdminDashboard = () => {
     const [profile, setProfile] = useState<Profile | null>(null);
+    const [stats, setStats] = useState<Stats | null>(null);
+    const [visitorStats, setVisitorStats] = useState<VisitorStats | null>(null);
+    const [recentMessages, setRecentMessages] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isPublic, setIsPublic] = useState(true);
-    const [toggling, setToggling] = useState(false);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetch = async () => {
             try {
-                const [stats, profileData] = await Promise.all([
+                const [profileData, statsData, visitorData, messagesData] = await Promise.all([
+                    profileService.getMyProfile(),
                     profileService.getStats(),
-                    profileService.getMyProfile()
+                    profileService.getVisitorStats(),
+                    profileService.getContactMessages(),
                 ]);
-                setStatsData(stats);
                 setProfile(profileData);
-                setIsPublic(profileData.isPublic !== false);
-            } catch (error) {
-                console.error('Failed to fetch dashboard data', error);
-            } finally {
-                setLoading(false);
-            }
+                setStats(statsData);
+                setVisitorStats(visitorData);
+                setRecentMessages(messagesData.slice(0, 5));
+            } catch (e) { console.error(e); }
+            finally { setLoading(false); }
         };
-        fetchData();
+        fetch();
     }, []);
-
-    const toggleVisibility = async () => {
-        setToggling(true);
-        try {
-            const updated = await profileService.updateProfile({ isPublic: !isPublic });
-            setIsPublic(updated.isPublic);
-        } catch (error) {
-            console.error('Failed to update visibility', error);
-            alert('Failed to update visibility');
-        } finally {
-            setToggling(false);
-        }
-    };
 
     if (loading) return <Loading />;
 
-    const publishedProjects = profile?.projects?.filter(p => p.published).length || 0;
-    const draftProjects = (profile?.projects?.length || 0) - publishedProjects;
+    const summaryCards = [
+        { label: 'Total Visitors', value: visitorStats?.total ?? 0, icon: <FaEye />, color: '#3b82f6', sub: `${visitorStats?.today ?? 0} today` },
+        { label: 'Messages', value: stats?.messages ?? 0, icon: <FaEnvelope />, color: '#f97316', sub: `${stats?.unreadMessages ?? 0} unread` },
+        { label: 'Projects', value: stats?.projects ?? 0, icon: <FaProjectDiagram />, color: '#8b5cf6', sub: 'portfolio items' },
+        { label: 'Skills', value: stats?.skills ?? 0, icon: <FaCode />, color: '#22c55e', sub: 'across all categories' },
+    ];
 
-    const mainStats = [
-        {
-            label: 'Total Views',
-            value: statsData.views.toLocaleString(),
-            icon: <FaEye />,
-            gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            change: '+12.5%',
-            trend: 'up'
-        },
-        {
-            label: 'Messages',
-            value: statsData.messages.toString(),
-            icon: <FaEnvelope />,
-            gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
-        },
-        {
-            label: 'Projects',
-            value: statsData.projects.toString(),
-            icon: <FaProjectDiagram />,
-            gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-            subtext: `${publishedProjects} published`,
-            change: `${draftProjects} drafts`
-        },
-        {
-            label: 'Total Skills',
-            value: statsData.skills.toString(),
-            icon: <FaCode />,
-            gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
-        },
+    const sectionCards = [
+        { label: 'Certifications', value: stats?.certifications ?? 0, icon: <FaCertificate />, color: '#22c55e', link: '/admin/resources' },
+        { label: 'Languages', value: stats?.languages ?? 0, icon: <FaLanguage />, color: '#06b6d4', link: '/admin/resources' },
+        { label: 'Experience', value: stats?.experience ?? 0, icon: <FaBriefcase />, color: '#ec4899', link: '/admin/resources' },
+        { label: 'Education', value: stats?.education ?? 0, icon: <FaGraduationCap />, color: '#f59e0b', link: '/admin/resources' },
     ];
 
     return (
-        <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
-            {/* Welcome Header */}
+        <div>
             <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '2.2rem', fontWeight: 800, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span>Dashboard Overview</span>
-                    <span style={{
-                        fontSize: '0.7rem',
-                        padding: '0.4rem 0.8rem',
-                        borderRadius: '20px',
-                        background: isPublic ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                        color: isPublic ? '#22c55e' : '#ef4444',
-                        fontWeight: 600,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.4rem'
-                    }}>
-                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: isPublic ? '#22c55e' : '#ef4444' }} />
-                        {isPublic ? 'Live' : 'Offline'}
-                    </span>
+                <h1 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '0.25rem' }}>
+                    Dashboard
                 </h1>
-                <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>
-                    Welcome back! Here's what's happening with your portfolio.
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+                    Welcome back, {profile?.firstName || 'Admin'} — here is your portfolio overview
                 </p>
             </div>
 
-            {/* Main Stats Grid */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                gap: '1.5rem',
-                marginBottom: '2rem'
-            }}>
-                {mainStats.map((stat, index) => (
-                    <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        style={{
-                            background: 'var(--bg-white)',
-                            border: '1px solid var(--border-color)',
-                            borderRadius: '12px',
-                            padding: '1.5rem',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            cursor: 'pointer',
-                            transition: 'all 0.3s'
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-4px)';
-                            e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = 'none';
-                        }}
-                    >
-                        <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            right: 0,
-                            width: '100px',
-                            height: '100px',
-                            background: stat.gradient,
-                            borderRadius: '50%',
-                            opacity: 0.1,
-                            transform: 'translate(30%, -30%)'
-                        }} />
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                            <div style={{
-                                width: '50px',
-                                height: '50px',
-                                borderRadius: '12px',
-                                background: stat.gradient,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white',
-                                fontSize: '1.4rem'
-                            }}>
-                                {stat.icon}
+            {/* Top Summary Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+                {summaryCards.map(card => (
+                    <div className="content-card" key={card.label} style={{ padding: '1.25rem', border: '1px solid var(--border-color)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '0.75rem' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: `${card.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: card.color, fontSize: '1.1rem' }}>
+                                {card.icon}
                             </div>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>{card.label}</span>
                         </div>
-
-                        <div>
-                            <h3 style={{
-                                fontSize: '2rem',
-                                fontWeight: 800,
-                                margin: '0 0 0.3rem 0',
-                                background: stat.gradient,
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent'
-                            }}>
-                                {stat.value}
-                            </h3>
-                            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', margin: '0 0 0.5rem 0', fontWeight: 500 }}>
-                                {stat.label}
-                            </p>
-                            {stat.subtext && (
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
-                                    {stat.subtext}
-                                </p>
-                            )}
-                            {stat.change && (
-                                <p style={{ fontSize: '0.8rem', color: stat.trend === 'up' ? '#22c55e' : 'var(--text-muted)', margin: 0, fontWeight: 600 }}>
-                                    {stat.change}
-                                </p>
-                            )}
-                        </div>
-                    </motion.div>
+                        <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-main)' }}>{card.value}</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>{card.sub}</div>
+                    </div>
                 ))}
             </div>
 
-            {/* Main Content Grid */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-                gap: '1.5rem',
-                marginBottom: '2rem'
-            }}>
-                {/* Profile Quick Stats */}
+            <div className="responsive-grid-2" style={{ marginBottom: '2rem' }}>
+                {/* Visitor Locations */}
                 <div className="content-card" style={{ padding: '1.5rem' }}>
-                    <h2 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                        <FaUserTie style={{ color: 'var(--primary-yellow)' }} /> Profile Status
-                    </h2>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
-                        {/* Visibility */}
-                        <div style={{ padding: '1rem', background: 'var(--bg-body)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Portfolio Visibility</span>
-                                <button
-                                    onClick={toggleVisibility}
-                                    disabled={toggling}
-                                    style={{
-                                        fontSize: '0.75rem',
-                                        padding: '0.3rem 0.8rem',
-                                        borderRadius: '6px',
-                                        background: 'var(--primary-teal)',
-                                        color: 'white',
-                                        border: 'none',
-                                        cursor: toggling ? 'not-allowed' : 'pointer',
-                                        opacity: toggling ? 0.5 : 1,
-                                        fontWeight: 600
-                                    }}
-                                >
-                                    {toggling ? 'Changing...' : 'Toggle'}
-                                </button>
-                            </div>
-                            <div style={{
-                                fontSize: '1.1rem',
-                                fontWeight: 700,
-                                color: isPublic ? '#22c55e' : '#ef4444',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.5rem'
-                            }}>
-                                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: isPublic ? '#22c55e' : '#ef4444' }} />
-                                {isPublic ? 'Public' : 'Private'}
-                            </div>
-                        </div>
-
-                        {/* Profile Completion */}
-                        <div style={{ padding: '1rem', background: 'var(--bg-body)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                            <div style={{ marginBottom: '0.8rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Profile Completion</span>
-                                    <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>85%</span>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FaMapMarkerAlt style={{ color: '#ef4444' }} /> Visitor Locations
+                    </h3>
+                    {visitorStats?.locations && visitorStats.locations.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {visitorStats.locations.map((loc, i) => (
+                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px solid var(--border-color)' }}>
+                                    <span style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <FaGlobeAfrica size={12} style={{ color: 'var(--text-muted)' }} /> {loc.location}
+                                    </span>
+                                    <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--primary-teal)' }}>{loc.count}</span>
                                 </div>
-                                <div style={{
-                                    height: '8px',
-                                    background: 'var(--border-color)',
-                                    borderRadius: '8px',
-                                    overflow: 'hidden'
-                                }}>
-                                    <div style={{
-                                        width: '85%',
-                                        height: '100%',
-                                        background: 'linear-gradient(90deg, var(--primary-yellow) 0%, var(--primary-teal) 100%)',
-                                        borderRadius: '8px'
-                                    }} />
-                                </div>
-                            </div>
-                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
-                                Add certifications to complete your profile
-                            </p>
+                            ))}
                         </div>
+                    ) : (
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No visitor data yet</p>
+                    )}
+                </div>
+
+                {/* Visitor Companies */}
+                <div className="content-card" style={{ padding: '1.5rem' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FaBuilding style={{ color: '#f97316' }} /> Visitor Companies
+                    </h3>
+                    {visitorStats?.companies && visitorStats.companies.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {visitorStats.companies.map((c, i) => (
+                                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px solid var(--border-color)' }}>
+                                    <span style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <FaBuilding size={12} style={{ color: 'var(--text-muted)' }} /> {c.company}
+                                    </span>
+                                    <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--primary-teal)' }}>{c.count}</span>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No company data yet</p>
+                    )}
+                </div>
+
+                {/* Recent Messages */}
+                <div className="content-card" style={{ padding: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <FaEnvelope style={{ color: '#3b82f6' }} /> Recent Messages
+                        </h3>
+                        <Link to="/admin/messages" style={{ color: 'var(--primary-teal)', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            View All <FaArrowRight size={10} />
+                        </Link>
                     </div>
+                    {recentMessages.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            {recentMessages.map((msg, i) => (
+                                <Link to="/admin/messages" key={msg.id || i} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0', borderBottom: '1px solid var(--border-color)', cursor: 'pointer' }}>
+                                        <div>
+                                            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{msg.name}</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{msg.subject || 'No subject'}</div>
+                                        </div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(msg.createdAt || Date.now()).toLocaleDateString()}</div>
+                                            {(!msg.status || msg.status === 'new') && (
+                                                <span style={{ fontSize: '0.65rem', padding: '0.15rem 0.4rem', borderRadius: '8px', background: '#ef4444', color: 'white', fontWeight: 700 }}>NEW</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No messages yet</p>
+                    )}
+                </div>
 
-                    <Link to="/admin/profile" style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                        width: '100%',
-                        padding: '0.9rem',
-                        background: 'linear-gradient(135deg, var(--primary-yellow) 0%, var(--primary-teal) 100%)',
-                        color: 'white',
-                        textAlign: 'center',
-                        borderRadius: '8px',
-                        fontWeight: 700,
-                        textDecoration: 'none',
-                        transition: 'all 0.3s'
-                    }}
-                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                    >
-                        Edit Profile <FaArrowRight />
-                    </Link>
+                {/* Portfolio Sections */}
+                <div className="content-card" style={{ padding: '1.5rem' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FaChartLine style={{ color: 'var(--primary-yellow)' }} /> Portfolio Sections
+                    </h3>
+                    <div className="form-grid-2">
+                        {sectionCards.map(card => (
+                            <Link to={card.link} key={card.label} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '0.75rem', borderRadius: '8px', background: 'var(--bg-body)', transition: 'all 0.2s' }}
+                                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--border-color)'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-body)'; }}
+                                >
+                                    <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: `${card.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: card.color }}>
+                                        {card.icon}
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{card.label}</div>
+                                        <div style={{ fontWeight: 800, fontSize: '1.1rem', color: card.color }}>{card.value}</div>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            {/* System Overview */}
-            <div className="content-card" style={{ padding: '1.5rem' }}>
-                <h2 style={{ fontSize: '1.3rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                    <FaChartLine style={{ color: 'var(--primary-teal)' }} /> System Overview
-                </h2>
-
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                    gap: '1rem'
-                }}>
-                    {/* Education */}
-                    <div style={{ padding: '1rem', background: 'var(--bg-body)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.8rem' }}>
-                            <div style={{
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '8px',
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white'
-                            }}>
-                                <FaGraduationCap />
+            {/* Bottom row: Profile Info + Quick Actions */}
+            <div className="responsive-grid-2">
+                <div className="content-card" style={{ padding: '1.5rem' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FaUser style={{ color: 'var(--primary-teal)' }} /> Profile Info
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {[
+                            { label: 'Name', value: `${profile?.firstName || ''} ${profile?.lastName || ''}` },
+                            { label: 'Email', value: profile?.email || '' },
+                            { label: 'Title', value: profile?.title || 'Not set' },
+                            { label: 'Location', value: profile?.location || 'Not set' },
+                            { label: 'Experience', value: `${profile?.yearsOfExperience || 0} years` },
+                            { label: 'Bio', value: profile?.bio ? `${profile.bio.slice(0, 60)}...` : 'Not set' },
+                        ].map(row => (
+                            <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0', borderBottom: '1px solid var(--border-color)', fontSize: '0.9rem' }}>
+                                <span style={{ color: 'var(--text-muted)' }}>{row.label}</span>
+                                <span style={{ fontWeight: 600, textAlign: 'right' }}>{row.value || '—'}</span>
                             </div>
-                            <div>
-                                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>
-                                    {profile?.education?.length || 0}
-                                </h3>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>Education</p>
-                            </div>
-                        </div>
+                        ))}
                     </div>
+                    <Link to="/admin/profile" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '1rem', color: 'var(--primary-teal)', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none' }}>
+                        Edit Profile <FaArrowRight size={11} />
+                    </Link>
+                </div>
 
-                    {/* Experience */}
-                    <div style={{ padding: '1rem', background: 'var(--bg-body)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.8rem' }}>
-                            <div style={{
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '8px',
-                                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white'
-                            }}>
-                                <FaBriefcase />
-                            </div>
-                            <div>
-                                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>
-                                    {profile?.experience?.length || 0}
-                                </h3>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>Experience</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Certifications */}
-                    <div style={{ padding: '1rem', background: 'var(--bg-body)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.8rem' }}>
-                            <div style={{
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '8px',
-                                background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white'
-                            }}>
-                                <FaCertificate />
-                            </div>
-                            <div>
-                                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>
-                                    {profile?.certifications?.length || 0}
-                                </h3>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>Certificates</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Languages */}
-                    <div style={{ padding: '1rem', background: 'var(--bg-body)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.8rem' }}>
-                            <div style={{
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '8px',
-                                background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white'
-                            }}>
-                                <FaGlobe />
-                            </div>
-                            <div>
-                                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>
-                                    {profile?.languages?.length || 0}
-                                </h3>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>Languages</p>
-                            </div>
-                        </div>
+                <div className="content-card" style={{ padding: '1.5rem' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FaClock style={{ color: 'var(--primary-yellow)' }} /> Quick Actions
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {[
+                            { to: '/admin/resources', icon: <FaProjectDiagram />, bg: '#f9731515', color: '#f97316', title: 'Manage Portfolio', sub: 'Edit projects, skills, certifications' },
+                            { to: '/admin/messages', icon: <FaEnvelope />, bg: '#3b82f615', color: '#3b82f6', title: 'View Messages', sub: 'Check contact form submissions' },
+                            { to: '/admin/profile', icon: <FaUser />, bg: '#22c55e15', color: '#22c55e', title: 'Update Profile', sub: 'Change your personal info' },
+                        ].map(action => (
+                            <Link to={action.to} key={action.title} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '0.75rem 1rem', borderRadius: '8px', background: 'var(--bg-body)', textDecoration: 'none', color: 'inherit', transition: 'all 0.2s' }}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'var(--border-color)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-body)'; }}
+                            >
+                                <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: action.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: action.color }}>{action.icon}</div>
+                                <div><div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{action.title}</div><div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{action.sub}</div></div>
+                            </Link>
+                        ))}
                     </div>
                 </div>
             </div>

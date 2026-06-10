@@ -1,6 +1,7 @@
 import Hero from '../../components/Hero';
 import Experience from '../../components/Experience';
 import Projects from '../../components/Projects';
+import Certifications from '../../components/Certifications';
 import Contact from '../../components/Contact';
 import { useOutletContext } from 'react-router-dom';
 import type { Profile } from '../../services/profileService';
@@ -25,6 +26,7 @@ const Home = () => {
             <Hero profile={profile} />
             <Experience profile={profile} />
             <Projects profile={profile} />
+            <Certifications profile={profile} />
             <Contact profile={profile} />
         </>
     );

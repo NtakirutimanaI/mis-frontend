@@ -35,9 +35,13 @@ function App() {
       try {
         const data = await profileService.getPublicProfile();
         setProfile(data);
+        // Track this visit
+        profileService.recordVisit({
+          page: window.location.pathname,
+          referrer: document.referrer || undefined,
+        }).catch(() => {});
       } catch (err: any) {
         console.error('Error fetching profile:', err);
-        // We still let loading finish so users can potentially login
       } finally {
         setLoading(false);
       }
@@ -66,7 +70,9 @@ function App() {
               </Route>
 
               {/* Auth Routes */}
-              <Route path="/login" element={<Login />} />
+              <Route element={<PublicLayout profile={profile} />}>
+                <Route path="/login" element={<Login />} />
+              </Route>
 
               {/* Admin Routes */}
               <Route element={<ProtectedRoute />}>

@@ -1,401 +1,624 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOutletContext } from 'react-router-dom';
-import { FaPlus, FaKey, FaLink, FaStickyNote, FaCalendarAlt, FaTrash, FaEdit, FaEye, FaEyeSlash, FaCopy, FaExternalLinkAlt, FaTimes } from 'react-icons/fa';
-import { resourcesService, type Resource } from '../../services/resourcesService';
+import {
+    FaUser, FaBriefcase, FaGraduationCap, FaCode, FaProjectDiagram,
+    FaCertificate, FaLanguage, FaCog, FaPlus, FaEdit, FaTrash,
+    FaTimes, FaCamera, FaSave
+} from 'react-icons/fa';
+import { profileService } from '../../services/profileService';
+import type { Profile } from '../../services/profileService';
 import Loading from '../../components/Loading';
+import { useToast } from '../../context/ToastContext';
+
+type SectionId = 'intro' | 'experience' | 'education' | 'skills' | 'projects' | 'certifications' | 'languages' | 'settings';
+
+const SECTION_COLORS: Record<string, string> = {
+    intro: 'var(--primary-yellow)', experience: 'var(--primary-teal)', education: 'var(--primary-yellow)',
+    skills: 'var(--primary-red)', projects: 'var(--primary-teal)', certifications: '#764ba2',
+    languages: '#f093fb', settings: 'var(--primary-yellow)',
+};
+
+const SECTION_ICONS: Record<string, React.ReactNode> = {
+    intro: <FaUser />, experience: <FaBriefcase />, education: <FaGraduationCap />,
+    skills: <FaCode />, projects: <FaProjectDiagram />, certifications: <FaCertificate />,
+    languages: <FaLanguage />, settings: <FaCog />,
+};
+
+const SECTIONS: SectionId[] = ['intro', 'experience', 'education', 'skills', 'projects', 'certifications', 'languages', 'settings'];
+
+const emptyP: Profile = {
+    id: '', firstName: '', lastName: '', username: '', email: '', bio: '', greeting: '', aboutMeTitle: '', title: '',
+    location: '', phone: '', website: '', avatar: '', cvUrl: '', yearsOfExperience: 0,
+    availableForHire: false, isPublic: false, education: [], experience: [],
+    skills: { backend: [], frontend: [], databases: [], tools: [] }, projects: [], certifications: [], languages: [], socialLinks: {}, services: [],
+    createdAt: '', updatedAt: '', role: '', type: '',
+};
 
 const Resources = () => {
-    const [resources, setResources] = useState<Resource[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('all');
-
-    // Global Search from Layout
     const { searchQuery } = useOutletContext<{ searchQuery: string }>();
+    const { showToast } = useToast();
+    const [profile, setProfile] = useState<Profile>(emptyP);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [filter, setFilter] = useState<SectionId>('intro');
 
-    // Modal State
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingId, setEditingId] = useState<string | null>(null);
-    const [formData, setFormData] = useState<any>({
-        type: 'credential',
-        title: '',
-        content: '',
-        metadata: {}
-    });
+    useEffect(() => { loadProfile(); }, []);
 
-    // Password Visibility State (local map by ID)
-    const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
-    const [copiedId, setCopiedId] = useState<string | null>(null);
+    const loadProfile = async () => {
+        try { setProfile(await profileService.getMyProfile()); }
+        catch (e) { console.error(e); }
+        finally { setLoading(false); }
+    };
 
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    const loadData = async () => {
+    const saveProfile = async (updates: Partial<Profile>) => {
+        setSaving(true);
         try {
-            const data = await resourcesService.getAll();
-            setResources(data);
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setLoading(false);
+            const r = await profileService.updateProfile(updates);
+            setProfile(r);
+            showToast('Saved successfully!', 'success');
+        } catch (e: any) { showToast(e?.response?.data?.message || 'Failed to save', 'error'); }
+        finally { setSaving(false); }
+    };
+
+    if (loading) return <Loading />;
+
+    const renderSection = () => {
+        switch (filter) {
+            case 'intro': return <IntroEditor profile={profile} onSave={saveProfile} saving={saving} />;
+            case 'experience': return <ArrayEditor title="Experience" items={profile.experience} color={SECTION_COLORS.experience} icon={SECTION_ICONS.experience}
+                fields={[
+                    { key: 'title', label: 'Title' }, { key: 'company', label: 'Company' }, { key: 'location', label: 'Location' },
+                    { key: 'startDate', label: 'Start Date', type: 'date' }, { key: 'endDate', label: 'End Date', type: 'date' },
+                ]}
+                checkbox={{ key: 'current', label: 'I currently work here' }}
+                defaultItem={{ title: '', company: '', location: '', startDate: '', endDate: '', current: false, technologies: [] }}
+                onSave={async (items) => { await saveProfile({ ...profile, experience: items }); }} saving={saving} searchQuery={searchQuery} searchFields={['title', 'company', 'location']}
+            />;
+            case 'education': return <ArrayEditor title="Education" items={profile.education} color={SECTION_COLORS.education} icon={SECTION_ICONS.education}
+                fields={[
+                    { key: 'degree', label: 'Degree' }, { key: 'institution', label: 'Institution' }, { key: 'location', label: 'Location' },
+                    { key: 'graduationYear', label: 'Graduation Year', type: 'number' },
+                ]}
+                defaultItem={{ degree: '', institution: '', location: '', graduationYear: new Date().getFullYear(), description: '' }}
+                onSave={async (items) => { await saveProfile({ ...profile, education: items }); }} saving={saving} searchQuery={searchQuery} searchFields={['degree', 'institution', 'location']}
+            />;
+            case 'skills': return <SkillsEditor skills={profile.skills} onSave={async (s) => { await saveProfile({ ...profile, skills: s as Profile['skills'] }); }} saving={saving} />;
+            case 'projects': return <ProjectsEditor projects={profile.projects} onSave={async (items) => { await saveProfile({ ...profile, projects: items }); }} saving={saving} searchQuery={searchQuery} />;
+            case 'certifications': return <ArrayEditor title="Certifications" items={profile.certifications} color={SECTION_COLORS.certifications} icon={SECTION_ICONS.certifications}
+                fields={[
+                    { key: 'name', label: 'Name' }, { key: 'issuer', label: 'Issuer' }, { key: 'date', label: 'Date', type: 'date' }, { key: 'credentialUrl', label: 'Credential URL' }, { key: 'imageUrl', label: 'Image', type: 'image' },
+                ]}
+                defaultItem={{ name: '', issuer: '', date: '', credentialUrl: '', imageUrl: '' }}
+                onSave={async (items) => { await saveProfile({ ...profile, certifications: items }); }} saving={saving} searchQuery={searchQuery} searchFields={['name', 'issuer']}
+            />;
+            case 'languages': return <ArrayEditor title="Languages" items={profile.languages} color={SECTION_COLORS.languages} icon={SECTION_ICONS.languages}
+                fields={[
+                    { key: 'language', label: 'Language' }, { key: 'proficiency', label: 'Proficiency' },
+                ]}
+                defaultItem={{ language: '', proficiency: '' }}
+                onSave={async (items) => { await saveProfile({ ...profile, languages: items }); }} saving={saving} searchQuery={searchQuery} searchFields={['language', 'proficiency']}
+            />;
+            case 'settings': return <SettingsEditor profile={profile} onSave={saveProfile} saving={saving} />;
         }
     };
-
-    const handleSave = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            if (editingId) {
-                await resourcesService.update(editingId, formData);
-            } else {
-                await resourcesService.create(formData);
-            }
-            setIsModalOpen(false);
-            loadData();
-        } catch (error) {
-            alert('Failed to save');
-            setLoading(false);
-        }
-    };
-
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this item?')) return;
-        try {
-            await resourcesService.delete(id);
-            setResources(prev => prev.filter(r => r.id !== id));
-        } catch (e) {
-            alert('Failed to delete');
-        }
-    };
-
-    const openEdit = (res: Resource) => {
-        setEditingId(res.id);
-        setFormData({
-            type: res.type,
-            title: res.title,
-            content: res.content,
-            metadata: res.metadata || {}
-        });
-        setIsModalOpen(true);
-    };
-
-    const openNew = () => {
-        setEditingId(null);
-        setFormData({
-            type: 'credential',
-            title: '',
-            content: '',
-            metadata: {}
-        });
-        setIsModalOpen(true);
-    };
-
-    const copyToClipboard = (text: string, id: string) => {
-        navigator.clipboard.writeText(text);
-        setCopiedId(id);
-        setTimeout(() => setCopiedId(null), 2000);
-    };
-
-    const togglePassword = (id: string) => {
-        setVisiblePasswords(prev => ({ ...prev, [id]: !prev[id] }));
-    };
-
-    // Filter Logic
-    const filtered = resources.filter(r => {
-        const matchesType = filter === 'all' || r.type === filter;
-        const query = (searchQuery || '').toLowerCase();
-        const matchesSearch = r.title.toLowerCase().includes(query) ||
-            r.content.toLowerCase().includes(query);
-        return matchesType && matchesSearch;
-    });
-
-    const getTypeIcon = (type: string) => {
-        switch (type) {
-            case 'credential': return <FaKey />;
-            case 'link': return <FaLink />;
-            case 'note': return <FaStickyNote />;
-            case 'event': return <FaCalendarAlt />;
-            default: return <FaStickyNote />;
-        }
-    };
-
-    const getTypeColor = (type: string) => {
-        switch (type) {
-            case 'credential': return 'var(--primary-yellow)';
-            case 'link': return 'var(--primary-teal)';
-            case 'event': return 'var(--primary-red)';
-            default: return '#999';
-        }
-    };
-
-    if (loading && resources.length === 0) return <Loading />;
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                    <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Vault & Resources</h1>
-                    <p style={{ color: 'var(--text-muted)' }}>Securely manage credentials, links, and important notes.</p>
+                    <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>Content CMS</h1>
+                    <p style={{ color: 'var(--text-muted)' }}>Manage all portfolio content sections in one place.</p>
                 </div>
-                <button onClick={openNew} className="btn-primary">
-                    <FaPlus /> Add New
-                </button>
             </div>
 
-            {/* Filter Tabs */}
             <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-color)' }}>
-                {['all', 'credential', 'link', 'note', 'event'].map(t => (
-                    <button
-                        key={t}
-                        onClick={() => setFilter(t)}
+                {SECTIONS.map(t => (
+                    <button key={t} onClick={() => setFilter(t)}
                         style={{
-                            padding: '0.5rem 1rem',
-                            borderRadius: '20px',
-                            fontSize: '0.85rem',
-                            fontWeight: 600,
-                            textTransform: 'capitalize',
-                            whiteSpace: 'nowrap',
-                            border: 'none',
+                            padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600,
+                            whiteSpace: 'nowrap', border: 'none', cursor: 'pointer', transition: 'all 0.2s',
                             background: filter === t ? 'var(--text-main)' : 'transparent',
                             color: filter === t ? 'var(--bg-body)' : 'var(--text-muted)',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
+                            display: 'flex', alignItems: 'center', gap: '6px',
+                            textTransform: 'capitalize',
                         }}
                     >
-                        {t === 'all' ? 'All Items' : t + 's'}
+                        <span style={{ fontSize: '0.8rem' }}>{SECTION_ICONS[t]}</span>
+                        {t}
                     </button>
                 ))}
             </div>
 
-            {/* Content Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                <AnimatePresence>
-                    {filtered.map(item => (
-                        <motion.div
-                            key={item.id}
-                            layout
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="content-card"
-                            style={{
-                                position: 'relative',
-                                padding: '0',
-                                overflow: 'hidden',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                height: '100%',
-                                borderTop: `4px solid ${getTypeColor(item.type)}`
-                            }}
-                        >
-                            <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                                    <div style={{
-                                        width: '40px', height: '40px', borderRadius: '8px',
-                                        background: 'var(--bg-body)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        color: getTypeColor(item.type), fontSize: '1.1rem'
-                                    }}>
-                                        {getTypeIcon(item.type)}
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '5px' }}>
-                                        <button onClick={() => openEdit(item)} className="admin-icon-btn" title="Edit"><FaEdit /></button>
-                                        <button onClick={() => handleDelete(item.id)} className="admin-icon-btn" style={{ color: 'var(--primary-red)' }} title="Delete"><FaTrash /></button>
-                                    </div>
-                                </div>
+            <AnimatePresence mode="wait">
+                <motion.div key={filter} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.15 }} style={{ display: 'flex', justifyContent: 'center' }}>
+                    <div style={{ width: '50%', minWidth: '300px', maxWidth: '100%' }}>
+                        {renderSection()}
+                    </div>
+                </motion.div>
+            </AnimatePresence>
+        </div>
+    );
+};
 
-                                <h3 style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.5rem', wordBreak: 'break-all' }}>{item.title}</h3>
+/* ───── Intro Editor ───── */
+const IntroEditor = ({ profile, onSave, saving }: { profile: Profile; onSave: (u: Partial<Profile>) => Promise<void>; saving: boolean }) => {
+    const { showToast } = useToast();
+    const [form, setForm] = useState({ greeting: profile.greeting, title: profile.title, aboutMeTitle: profile.aboutMeTitle, bio: profile.bio, avatar: profile.avatar, cvUrl: profile.cvUrl });
+    const fileRef = useRef<HTMLInputElement>(null);
+    const cvFileRef = useRef<HTMLInputElement>(null);
+    const [savingLocal, setSavingLocal] = useState(false);
 
-                                <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', flex: 1 }}>
-                                    {/* Render based on Type */}
-                                    {item.type === 'credential' && (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                            {item.metadata?.username && (
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-body)', padding: '0.5rem', borderRadius: '6px', fontSize: '0.8rem', fontFamily: 'monospace' }}>
-                                                    <span style={{ color: 'var(--text-muted)' }}>User:</span>
-                                                    <span>{item.metadata.username}</span>
-                                                    <button onClick={() => copyToClipboard(item.metadata.username, item.id + 'user')} style={{ marginLeft: 'auto', cursor: 'pointer', color: copiedId === item.id + 'user' ? 'var(--primary-teal)' : 'inherit' }}>
-                                                        <FaCopy />
-                                                    </button>
-                                                </div>
-                                            )}
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-body)', padding: '0.5rem', borderRadius: '6px', fontSize: '0.8rem', fontFamily: 'monospace' }}>
-                                                <span style={{ color: 'var(--text-muted)' }}>Pass:</span>
-                                                <span>{visiblePasswords[item.id] ? item.content : '••••••••'}</span>
-                                                <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
-                                                    <button onClick={() => togglePassword(item.id)} style={{ cursor: 'pointer' }}>{visiblePasswords[item.id] ? <FaEyeSlash /> : <FaEye />}</button>
-                                                    <button onClick={() => copyToClipboard(item.content, item.id + 'pass')} style={{ cursor: 'pointer', color: copiedId === item.id + 'pass' ? 'var(--primary-teal)' : 'inherit' }}>
-                                                        <FaCopy />
-                                                    </button>
-                                                </div>
+    useEffect(() => { setForm({ greeting: profile.greeting, title: profile.title, aboutMeTitle: profile.aboutMeTitle, bio: profile.bio, avatar: profile.avatar, cvUrl: profile.cvUrl }); }, [profile]);
+
+    const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]; if (!file) return;
+        if (file.size > 2 * 1024 * 1024) { showToast('Image must be smaller than 2MB', 'error'); return; }
+        const r = new FileReader(); r.onloadend = () => setForm(prev => ({ ...prev, avatar: r.result as string })); r.readAsDataURL(file);
+    };
+
+    const handleCV = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]; if (!file) return;
+        if (file.size > 5 * 1024 * 1024) { showToast('CV must be smaller than 5MB', 'error'); return; }
+        const r = new FileReader(); r.onloadend = () => setForm(prev => ({ ...prev, cvUrl: r.result as string })); r.readAsDataURL(file);
+    };
+
+    const handleSave = async () => {
+        setSavingLocal(true);
+        await onSave(form);
+        setSavingLocal(false);
+    };
+
+    return (
+        <div className="content-card" style={{ padding: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Hero / Intro</h3>
+
+            <div style={{ display: 'flex', gap: '2rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                <input type="file" ref={fileRef} onChange={handleFile} accept="image/*" style={{ display: 'none' }} />
+                <div onClick={() => fileRef.current?.click()} style={{ width: '100px', height: '100px', borderRadius: '50%', overflow: 'hidden', cursor: 'pointer', position: 'relative', flexShrink: 0 }}>
+                    {form.avatar ? (
+                        <img src={form.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/100?text=Error'; }} />
+                    ) : (
+                        <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#ddd', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontWeight: 600 }}>No Image</div>
+                    )}
+                    <div style={{ position: 'absolute', bottom: 0, right: 0, background: 'var(--primary-teal)', color: '#fff', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--bg-white)' }}>
+                        <FaCamera size={12} />
+                    </div>
+                </div>
+            </div>
+
+            <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Greeting</label>
+                <input value={form.greeting || ''} onChange={e => setForm(p => ({ ...p, greeting: e.target.value }))} className="form-input" placeholder="Hello" />
+            </div>
+
+            <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Highlighted Title</label>
+                <input value={form.title || ''} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className="form-input" placeholder="Software Engineer|Fullstack Developer" style={{ fontWeight: 700, color: 'var(--primary-teal)' }} />
+            </div>
+
+            <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">Section Title</label>
+                <input value={form.aboutMeTitle || ''} onChange={e => setForm(p => ({ ...p, aboutMeTitle: e.target.value }))} className="form-input" placeholder="A Bit About Me" style={{ textDecoration: 'underline' }} />
+            </div>
+
+            <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label className="form-label">CV / Resume</label>
+                <input type="file" ref={cvFileRef} onChange={handleCV} accept=".pdf,.doc,.docx" style={{ display: 'none' }} />
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button type="button" onClick={() => cvFileRef.current?.click()} className="btn-primary" style={{ fontSize: '0.85rem', padding: '0.4rem 0.8rem' }}>
+                        {form.cvUrl ? 'Replace CV' : 'Upload CV'}
+                    </button>
+                    {form.cvUrl && <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>CV uploaded</span>}
+                    {form.cvUrl && <button type="button" onClick={() => setForm(p => ({ ...p, cvUrl: '' }))} style={{ background: 'none', border: 'none', color: 'var(--primary-red)', cursor: 'pointer', fontSize: '0.85rem' }}>Remove</button>}
+                </div>
+            </div>
+
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label">Bio</label>
+                <textarea value={form.bio || ''} onChange={e => setForm(p => ({ ...p, bio: e.target.value }))} className="form-textarea" rows={5} />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button onClick={handleSave} disabled={saving || savingLocal} className="btn-primary">
+                    {saving || savingLocal ? 'Saving...' : <><FaSave /> Save Intro</>}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+/* ───── Array Editor (inline list + modal) ───── */
+interface FieldDef { key: string; label: string; type?: 'text' | 'number' | 'date' | 'image'; }
+interface ArrayEditorProps {
+    title: string; items: any[]; color: string; icon: React.ReactNode;
+    fields: FieldDef[]; checkbox?: { key: string; label: string };
+    defaultItem: any; onSave: (items: any[]) => Promise<void>; saving: boolean;
+    searchQuery?: string; searchFields?: string[];
+}
+
+const ArrayEditor: React.FC<ArrayEditorProps> = ({ title, items, color, icon, fields, checkbox, defaultItem, onSave, saving, searchQuery = '', searchFields }) => {
+    const [local, setLocal] = useState(items || []);
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [form, setForm] = useState<any>(null);
+    const [localSaving, setLocalSaving] = useState(false);
+    const fileRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => { setLocal(items || []); }, [items]);
+
+    const q = searchQuery.toLowerCase();
+    const filtered = q && searchFields ? local.filter((item: any) => searchFields.some(f => String(item[f] || '').toLowerCase().includes(q))) : local;
+
+    const saveItems = async (updated: any[]) => {
+        setLocalSaving(true);
+        setLocal(updated);
+        await onSave(updated);
+        setLocalSaving(false);
+    };
+
+    const openNew = () => { setEditingIndex(-1); setForm({ ...defaultItem }); };
+    const openEdit = (index: number) => {
+        const orig = local.indexOf(filtered[index]);
+        setEditingIndex(orig);
+        setForm({ ...local[orig] });
+    };
+    const cancel = () => { setEditingIndex(null); setForm(null); };
+
+    const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value, type: t } = e.target;
+        setForm((prev: any) => ({ ...prev, [name]: t === 'number' ? parseInt(value) || 0 : value }));
+    };
+
+    const handleSave = async () => {
+        const updated = [...local];
+        if (editingIndex === -1) updated.push(form);
+        else if (editingIndex !== null) updated[editingIndex] = form;
+        await saveItems(updated);
+        cancel();
+    };
+
+    const handleDelete = async (index: number) => {
+        if (!window.confirm(`Delete this ${title.toLowerCase().slice(0, -1)}?`)) return;
+        const orig = local.indexOf(filtered[index]);
+        await saveItems(local.filter((_: any, i: number) => i !== orig));
+    };
+
+    const isSaving = saving || localSaving;
+
+    return (
+        <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ color }}>{icon}</span> {title} ({local.length})
+                </h3>
+                <button onClick={openNew} disabled={editingIndex !== null || isSaving} className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}>
+                    <FaPlus /> Add
+                </button>
+            </div>
+
+            <AnimatePresence>
+                {editingIndex !== null && form && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                        className="content-card" style={{ marginBottom: '1.5rem', border: `2px solid ${color}` }}
+                    >
+                        <h4 style={{ fontWeight: 700, marginBottom: '1rem' }}>{editingIndex === -1 ? `Add ${title.slice(0, -1)}` : `Edit ${title.slice(0, -1)}`}</h4>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                            {fields.map(f => (
+                                <div className="form-group" key={f.key}>
+                                    <label className="form-label">{f.label}</label>
+                                    {f.type === 'image' ? (
+                                        <>
+                                            <input type="file" ref={fileRef} onChange={(e) => { const fl = e.target.files?.[0]; if (!fl) return; if (fl.size > 2 * 1024 * 1024) { alert('Image must be smaller than 2MB'); return; } const r = new FileReader(); r.onloadend = () => setForm((prev: any) => ({ ...prev, [f.key]: r.result as string })); r.readAsDataURL(fl); }} accept="image/*" style={{ display: 'none' }} />
+                                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                                {form[f.key] && <div style={{ width: '70px', height: '70px', borderRadius: '6px', overflow: 'hidden', border: '2px solid var(--border-color)' }}>
+                                                    <img src={form[f.key]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                </div>}
+                                                <button type="button" onClick={() => fileRef.current?.click()} className="admin-icon-btn" style={{ width: 'auto', padding: '0.5rem 1rem', gap: '6px', border: '1px solid var(--border-color)', borderRadius: '6px' }}><FaCamera /> {form[f.key] ? 'Replace' : 'Upload'}</button>
+                                                {form[f.key] && <button type="button" onClick={() => setForm((prev: any) => ({ ...prev, [f.key]: '' }))} className="admin-icon-btn" style={{ color: 'var(--primary-red)', width: 'auto', padding: '0.5rem 1rem', border: '1px solid var(--primary-red)', borderRadius: '6px' }}><FaTimes /> Remove</button>}
                                             </div>
-                                        </div>
-                                    )}
-
-                                    {item.type === 'link' && (
-                                        <div>
-                                            <a href={item.content} target="_blank" rel="noreferrer" style={{ color: 'var(--primary-teal)', display: 'flex', alignItems: 'center', gap: '5px', wordBreak: 'break-all' }}>
-                                                <FaExternalLinkAlt size={12} /> {item.content}
-                                            </a>
-                                            {item.metadata?.description && <p style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>{item.metadata.description}</p>}
-                                        </div>
-                                    )}
-
-                                    {item.type === 'note' && (
-                                        <p style={{ whiteSpace: 'pre-wrap' }}>{item.content}</p>
-                                    )}
-
-                                    {item.type === 'event' && (
-                                        <div>
-                                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'var(--bg-body)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-                                                <FaCalendarAlt /> {item.metadata?.date ? new Date(item.metadata.date).toLocaleDateString() : 'No Date'}
-                                            </div>
-                                            <p>{item.content}</p>
-                                        </div>
+                                            <input value={form[f.key] || ''} onChange={e => setForm((prev: any) => ({ ...prev, [f.key]: e.target.value }))} className="form-input" placeholder="Or paste URL..." style={{ marginTop: '0.5rem' }} />
+                                        </>
+                                    ) : (
+                                        <input name={f.key} type={f.type || 'text'} value={form[f.key] || ''} onChange={handleFormChange} className="form-input" />
                                     )}
                                 </div>
+                            ))}
+                        </div>
+                        {checkbox && (
+                            <div className="form-group" style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                                    <input type="checkbox" checked={form[checkbox.key]} onChange={e => setForm((prev: any) => ({ ...prev, [checkbox.key]: e.target.checked }))} />
+                                    {checkbox.label}
+                                </label>
                             </div>
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
+                        )}
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                            <button onClick={cancel} className="admin-icon-btn" style={{ fontSize: '0.9rem', width: 'auto', padding: '0.5rem 1rem' }} disabled={isSaving}>Cancel</button>
+                            <button onClick={handleSave} className="btn-primary" disabled={isSaving}>{isSaving ? 'Saving...' : 'Save'}</button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {filtered.map((item: any, i: number) => (
+                    <div key={i} className="content-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.8rem 1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: 'var(--bg-body)', display: 'flex', alignItems: 'center', justifyContent: 'center', color, flexShrink: 0 }}>{icon}</div>
+                            <div style={{ minWidth: 0 }}>
+                                <div style={{ fontWeight: 700, fontSize: '0.95rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {fields[0] ? item[fields[0].key] || '(untitled)' : ''}
+                                </div>
+                                {fields[1] && <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item[fields[1].key] || ''}</div>}
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                            <button onClick={() => openEdit(i)} className="admin-icon-btn" disabled={isSaving}><FaEdit /></button>
+                            <button onClick={() => handleDelete(i)} className="admin-icon-btn" style={{ color: 'var(--primary-red)' }} disabled={isSaving}><FaTrash /></button>
+                        </div>
+                    </div>
+                ))}
                 {filtered.length === 0 && (
-                    <div style={{ gridColumn: '1 / -1', padding: '3rem', textAlign: 'center', border: '2px dashed var(--border-color)', borderRadius: '12px', color: 'var(--text-muted)' }}>
-                        {searchQuery ? `No resources found matching "${searchQuery}"` : 'No resources found in this category.'}
+                    <div style={{ padding: '2rem', textAlign: 'center', border: '2px dashed var(--border-color)', borderRadius: '12px', color: 'var(--text-muted)' }}>
+                        {q ? `No matches for "${q}"` : `No ${title.toLowerCase()} yet.`}
                     </div>
                 )}
             </div>
+        </div>
+    );
+};
 
-            {/* Modal Overlay */}
-            <AnimatePresence>
-                {isModalOpen && (
-                    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="content-card"
-                            style={{ width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}
-                        >
-                            <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-white)' }}>
-                                <h3 style={{ fontWeight: 800, fontSize: '1.1rem' }}>{editingId ? 'Edit Item' : 'Add New Item'}</h3>
-                                <button onClick={() => setIsModalOpen(false)} style={{ color: 'var(--text-muted)' }}><FaTimes /></button>
-                            </div>
+/* ───── Skills Editor ───── */
+const SkillsEditor = ({ skills, onSave, saving }: { skills: Record<string, string[]>; onSave: (s: Record<string, string[]>) => Promise<void>; saving: boolean }) => {
+    const [local, setLocal] = useState<Record<string, string[]>>(JSON.parse(JSON.stringify(skills || {})));
+    const [newCat, setNewCat] = useState('');
+    const [newSkill, setNewSkill] = useState<Record<string, string>>({});
+    const [localSaving, setLocalSaving] = useState(false);
+    const isSaving = saving || localSaving;
 
-                            <form onSubmit={handleSave} style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '80vh', overflowY: 'auto', background: 'var(--bg-body)' }}>
-                                <div className="form-group">
-                                    <label className="form-label">Type</label>
-                                    <select
-                                        className="form-select"
-                                        value={formData.type}
-                                        onChange={e => setFormData({ ...formData, type: e.target.value })}
+    const addCategory = () => {
+        if (!newCat.trim()) return;
+        const key = newCat.toLowerCase().replace(/\s+/g, '-');
+        if (local[key]) { alert('Category already exists'); return; }
+        setLocal(prev => ({ ...prev, [key]: [] })); setNewCat('');
+    };
+
+    const save = async () => { setLocalSaving(true); await onSave(local); setLocalSaving(false); };
+
+    return (
+        <div>
+            <div className="content-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: 1 }}>
+                    <input value={newCat} onChange={e => setNewCat(e.target.value)} onKeyDown={e => e.key === 'Enter' && addCategory()} placeholder="New category (e.g. DevOps)" className="form-input" style={{ width: '250px' }} />
+                    <button onClick={addCategory} className="admin-icon-btn" style={{ padding: '0.5rem 1rem', width: 'auto', fontSize: '0.9rem', border: '1px solid var(--border-color)', borderRadius: '6px' }}><FaPlus /> Add Category</button>
+                </div>
+                <button onClick={save} disabled={isSaving} className="btn-primary">{isSaving ? 'Saving...' : <><FaSave /> Save Skills</>}</button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                {Object.entries(local).filter(([category]) => category !== 'other').map(([category, categorySkills]) => (
+                    <div key={category} className="content-card" style={{ position: 'relative' }}>
+                        <button onClick={() => { if (window.confirm(`Delete "${category}"?`)) setLocal(prev => { const n = { ...prev }; delete n[category]; return n; }); }}
+                            style={{ position: 'absolute', top: '1rem', right: '1rem', color: 'var(--text-muted)', opacity: 0.5, cursor: 'pointer' }}><FaTrash /></button>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '1rem', textTransform: 'capitalize' }}>{category.replace(/-/g, ' ')}</h3>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem', minHeight: '40px' }}>
+                            <AnimatePresence>
+                                {categorySkills.map(skill => (
+                                    <motion.span key={skill} layout initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }}
+                                        style={{ background: 'var(--bg-body)', border: '1px solid var(--border-color)', padding: '0.3rem 0.6rem', borderRadius: '20px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}
                                     >
-                                        <option value="credential">Credential (User/Pass)</option>
-                                        <option value="link">Link / Bookmark</option>
-                                        <option value="note">Secure Note</option>
-                                        <option value="event">Event / Date</option>
-                                    </select>
-                                </div>
-
-                                <div className="form-group">
-                                    <label className="form-label">Title</label>
-                                    <input
-                                        className="form-input"
-                                        value={formData.title}
-                                        onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                        required
-                                        placeholder="e.g. GitHub Login, Portfolio Design Link"
-                                    />
-                                </div>
-
-                                {formData.type === 'credential' && (
-                                    <>
-                                        <div className="form-group">
-                                            <label className="form-label">Username / Email</label>
-                                            <input
-                                                className="form-input"
-                                                value={formData.metadata?.username || ''}
-                                                onChange={e => setFormData({ ...formData, metadata: { ...formData.metadata, username: e.target.value } })}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label className="form-label">Password / Key</label>
-                                            <input
-                                                className="form-input"
-                                                value={formData.content}
-                                                onChange={e => setFormData({ ...formData, content: e.target.value })}
-                                                type="text"
-                                                placeholder="Secret value"
-                                            />
-                                        </div>
-                                    </>
-                                )}
-
-                                {formData.type === 'link' && (
-                                    <>
-                                        <div className="form-group">
-                                            <label className="form-label">URL</label>
-                                            <input
-                                                className="form-input"
-                                                value={formData.content}
-                                                onChange={e => setFormData({ ...formData, content: e.target.value })}
-                                                placeholder="https://..."
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label className="form-label">Description (Optional)</label>
-                                            <input
-                                                className="form-input"
-                                                value={formData.metadata?.description || ''}
-                                                onChange={e => setFormData({ ...formData, metadata: { ...formData.metadata, description: e.target.value } })}
-                                            />
-                                        </div>
-                                    </>
-                                )}
-
-                                {formData.type === 'note' && (
-                                    <div className="form-group">
-                                        <label className="form-label">Note Content</label>
-                                        <textarea
-                                            className="form-textarea"
-                                            rows={5}
-                                            value={formData.content}
-                                            onChange={e => setFormData({ ...formData, content: e.target.value })}
-                                        />
-                                    </div>
-                                )}
-
-                                {formData.type === 'event' && (
-                                    <>
-                                        <div className="form-group">
-                                            <label className="form-label">Event Date</label>
-                                            <input
-                                                type="date"
-                                                className="form-input"
-                                                value={formData.metadata?.date || ''}
-                                                onChange={e => setFormData({ ...formData, metadata: { ...formData.metadata, date: e.target.value } })}
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label className="form-label">Details</label>
-                                            <textarea
-                                                className="form-textarea"
-                                                value={formData.content}
-                                                onChange={e => setFormData({ ...formData, content: e.target.value })}
-                                            />
-                                        </div>
-                                    </>
-                                )}
-
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '1rem' }}>
-                                    <button type="button" onClick={() => setIsModalOpen(false)} className="admin-icon-btn" style={{ fontSize: '0.9rem', width: 'auto', padding: '0.5rem 1rem' }}>Cancel</button>
-                                    <button type="submit" className="btn-primary">Save Item</button>
-                                </div>
-                            </form>
-                        </motion.div>
+                                        {skill}
+                                        <button onClick={() => setLocal(prev => ({ ...prev, [category]: prev[category].filter(s => s !== skill) }))} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'var(--text-muted)' }}>
+                                            <FaTimes size={10} />
+                                        </button>
+                                    </motion.span>
+                                ))}
+                            </AnimatePresence>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <input value={newSkill[category] || ''} onChange={e => setNewSkill(prev => ({ ...prev, [category]: e.target.value }))} onKeyDown={e => e.key === 'Enter' && (() => { const s = newSkill[category]?.trim(); if (s) { setLocal(prev => ({ ...prev, [category]: [...(prev[category] || []), s] })); setNewSkill(prev => ({ ...prev, [category]: '' })); } })()} placeholder="Add skill..." className="form-input" style={{ flex: 1, fontSize: '0.9rem', padding: '0.4rem 0.8rem' }} />
+                            <button onClick={() => { const s = newSkill[category]?.trim(); if (s) { setLocal(prev => ({ ...prev, [category]: [...(prev[category] || []), s] })); setNewSkill(prev => ({ ...prev, [category]: '' })); } }} className="btn-primary" style={{ padding: '0.4rem 0.8rem', minWidth: 'auto' }}><FaPlus /></button>
+                        </div>
                     </div>
+                ))}
+                {Object.keys(local).length === 0 && (
+                    <div style={{ gridColumn: '1 / -1', padding: '3rem', textAlign: 'center', border: '2px dashed var(--border-color)', borderRadius: '12px', color: 'var(--text-muted)' }}>No skill categories yet.</div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+/* ───── Projects Editor ───── */
+const ProjectsEditor = ({ projects, onSave, saving, searchQuery }: { projects: Profile['projects']; onSave: (items: Profile['projects']) => Promise<void>; saving: boolean; searchQuery?: string }) => {
+    const [local, setLocal] = useState(projects);
+    const [filter, setFilter] = useState('All');
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [form, setForm] = useState<any>(null);
+    const [localSaving, setLocalSaving] = useState(false);
+    const fileRef = useRef<HTMLInputElement>(null);
+    const categories = ['Backend', 'Frontend', 'UI/UX', 'Fullstack', 'Other'];
+
+    useEffect(() => { setLocal(projects); }, [projects]);
+
+    const q = searchQuery?.toLowerCase() || '';
+    const filtered = local.filter(p => {
+        const mc = filter === 'All' || p.category === filter;
+        const ms = !q || p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q) || (p.technologies || []).some(t => t.toLowerCase().includes(q));
+        return mc && ms;
+    });
+
+    const saveProjects = async (updated: Profile['projects']) => {
+        setLocalSaving(true); setLocal(updated); await onSave(updated); setLocalSaving(false);
+    };
+
+    const openNew = () => { setEditingIndex(-1); setForm({ name: '', description: '', technologies: [], url: '', githubUrl: '', imageUrl: '', featured: false, category: 'Other', effectiveness: 50, published: true, type: '', role: '' }); };
+    const openEdit = (index: number) => { const orig = local.indexOf(filtered[index]); setEditingIndex(orig); setForm({ ...local[orig] }); };
+    const cancel = () => { setEditingIndex(null); setForm(null); };
+
+    const isSaving = saving || localSaving;
+
+    const handleSave = async () => {
+        const updated = [...local];
+        if (editingIndex === -1) updated.push(form);
+        else if (editingIndex !== null) updated[editingIndex] = form;
+        await saveProjects(updated); cancel();
+    };
+
+    const handleDelete = async (index: number) => {
+        if (!window.confirm('Delete this project?')) return;
+        const orig = local.indexOf(filtered[index]);
+        await saveProjects(local.filter((_, i) => i !== orig));
+    };
+
+    return (
+        <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ color: SECTION_COLORS.projects }}><FaProjectDiagram /></span> Projects ({local.length})
+                </h3>
+                <button onClick={openNew} disabled={editingIndex !== null || isSaving} className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}><FaPlus /> Add</button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>
+                {['All', ...categories].map(cat => (
+                    <button key={cat} onClick={() => setFilter(cat)}
+                        style={{
+                            padding: '0.5rem 1rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600,
+                            whiteSpace: 'nowrap', border: 'none', cursor: 'pointer',
+                            background: filter === cat ? 'var(--text-main)' : 'transparent',
+                            color: filter === cat ? 'var(--bg-body)' : 'var(--text-muted)',
+                        }}
+                    >{cat}</button>
+                ))}
+            </div>
+
+            <AnimatePresence>
+                {editingIndex !== null && form && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                        className="content-card" style={{ border: '2px solid var(--primary-yellow)', marginBottom: '2rem', padding: '1.5rem' }}
+                    >
+                        <h4 style={{ fontWeight: 800, marginBottom: '1rem' }}>{editingIndex === -1 ? 'New Project' : 'Edit Project'}</h4>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                            <div className="form-group"><label className="form-label">Name</label><input name="name" value={form.name} onChange={e => setForm((p: any) => ({ ...p, name: e.target.value }))} className="form-input" /></div>
+                            <div className="form-group"><label className="form-label">Category</label>
+                                <select value={form.category || 'Other'} onChange={e => setForm((p: any) => ({ ...p, category: e.target.value }))} className="form-select">
+                                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="form-group" style={{ marginBottom: '1rem' }}>
+                            <label className="form-label">Image</label>
+                            <input type="file" ref={fileRef} onChange={(e) => { const f = e.target.files?.[0]; if (!f) return; if (f.size > 2 * 1024 * 1024) { alert('Image must be smaller than 2MB'); return; } const r = new FileReader(); r.onloadend = () => setForm((prev: any) => ({ ...prev, imageUrl: r.result as string })); r.readAsDataURL(f); }} accept="image/*" style={{ display: 'none' }} />
+                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                {form.imageUrl && <div style={{ width: '70px', height: '70px', borderRadius: '6px', overflow: 'hidden', border: '2px solid var(--border-color)' }}>
+                                    <img src={form.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/70?text=Error'; }} />
+                                </div>}
+                                <button type="button" onClick={() => fileRef.current?.click()} className="admin-icon-btn" style={{ width: 'auto', padding: '0.5rem 1rem', gap: '6px', border: '1px solid var(--border-color)', borderRadius: '6px' }}><FaCamera /> {form.imageUrl ? 'Replace' : 'Upload'}</button>
+                                {form.imageUrl && <button type="button" onClick={() => setForm((p: any) => ({ ...p, imageUrl: '' }))} className="admin-icon-btn" style={{ color: 'var(--primary-red)', width: 'auto', padding: '0.5rem 1rem', border: '1px solid var(--primary-red)', borderRadius: '6px' }}><FaTimes /> Remove</button>}
+                            </div>
+                            <input value={form.imageUrl || ''} onChange={e => setForm((p: any) => ({ ...p, imageUrl: e.target.value }))} className="form-input" placeholder="Or paste URL..." style={{ marginTop: '0.5rem' }} />
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                            <div className="form-group"><label className="form-label">Live URL</label><input value={form.url || ''} onChange={e => setForm((p: any) => ({ ...p, url: e.target.value }))} className="form-input" /></div>
+                            <div className="form-group"><label className="form-label">GitHub URL</label><input value={form.githubUrl || ''} onChange={e => setForm((p: any) => ({ ...p, githubUrl: e.target.value }))} className="form-input" /></div>
+                        </div>
+                        <div className="form-group" style={{ marginBottom: '1rem' }}>
+                            <label className="form-label">Description</label>
+                            <textarea value={form.description} onChange={e => setForm((p: any) => ({ ...p, description: e.target.value }))} className="form-textarea" rows={3} />
+                        </div>
+                        <div className="form-group" style={{ marginBottom: '1rem' }}>
+                            <label className="form-label">Technologies (comma separated)</label>
+                            <input value={Array.isArray(form.technologies) ? form.technologies.join(', ') : form.technologies || ''} onChange={e => setForm((p: any) => ({ ...p, technologies: e.target.value.split(',').map((t: string) => t.trim()).filter(Boolean) }))} className="form-input" />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                            <button onClick={cancel} className="admin-icon-btn" style={{ fontSize: '0.9rem', width: 'auto', padding: '0.5rem 1rem' }} disabled={isSaving}>Cancel</button>
+                            <button onClick={handleSave} className="btn-primary" disabled={isSaving}>{isSaving ? 'Saving...' : 'Save'}</button>
+                        </div>
+                    </motion.div>
                 )}
             </AnimatePresence>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {filtered.map((p, i) => (
+                    <div key={i} className="content-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.8rem 1rem', gap: '1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: 0 }}>
+                            {p.imageUrl && <div style={{ width: '44px', height: '44px', borderRadius: '6px', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--border-color)' }}>
+                                <img src={p.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                            </div>}
+                            <div style={{ minWidth: 0 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                    <strong style={{ fontSize: '0.95rem' }}>{p.name}</strong>
+                                    {p.category && <span style={{ fontSize: '0.7rem', background: 'var(--bg-body)', color: 'var(--text-muted)', border: '1px solid var(--border-color)', padding: '2px 6px', borderRadius: '4px' }}>{p.category}</span>}
+                                    {p.published
+                                        ? <span style={{ fontSize: '0.7rem', background: 'rgba(78,205,196,0.15)', color: 'var(--primary-teal)', padding: '2px 6px', borderRadius: '4px' }}>Published</span>
+                                        : <span style={{ fontSize: '0.7rem', background: 'var(--bg-body)', color: 'var(--text-muted)', padding: '2px 6px', borderRadius: '4px' }}>Draft</span>}
+                                </div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '400px' }}>{p.description}</div>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                            <button onClick={() => openEdit(i)} className="admin-icon-btn" disabled={isSaving}><FaEdit /></button>
+                            <button onClick={() => handleDelete(i)} className="admin-icon-btn" style={{ color: 'var(--primary-red)' }} disabled={isSaving}><FaTrash /></button>
+                        </div>
+                    </div>
+                ))}
+                {filtered.length === 0 && (
+                    <div style={{ padding: '2rem', textAlign: 'center', border: '2px dashed var(--border-color)', borderRadius: '12px', color: 'var(--text-muted)' }}>{q ? `No matches for "${q}"` : 'No projects yet.'}</div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+/* ───── Settings Editor ───── */
+const SettingsEditor = ({ profile, onSave, saving }: { profile: Profile; onSave: (u: Partial<Profile>) => Promise<void>; saving: boolean }) => {
+    const [form, setForm] = useState({ website: profile.website || '', yearsOfExperience: profile.yearsOfExperience || 0, availableForHire: profile.availableForHire, isPublic: profile.isPublic ?? true, socialLinks: { ...(profile.socialLinks || {}) } });
+    const [localSaving, setLocalSaving] = useState(false);
+
+    useEffect(() => { setForm({ website: profile.website || '', yearsOfExperience: profile.yearsOfExperience || 0, availableForHire: profile.availableForHire, isPublic: profile.isPublic ?? true, socialLinks: { ...(profile.socialLinks || {}) } }); }, [profile]);
+
+    const handleSave = async () => { setLocalSaving(true); await onSave(form); setLocalSaving(false); };
+    const isSaving = saving || localSaving;
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className="content-card" style={{ padding: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Profile Settings</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                    <div className="form-group"><label className="form-label">Website</label><input value={form.website} onChange={e => setForm(p => ({ ...p, website: e.target.value }))} className="form-input" /></div>
+                    <div className="form-group"><label className="form-label">Years of Experience</label><input type="number" value={form.yearsOfExperience} onChange={e => setForm(p => ({ ...p, yearsOfExperience: parseInt(e.target.value) || 0 }))} className="form-input" /></div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="form-group">
+                        <label className="form-label">Available for Hire</label>
+                        <select value={String(form.availableForHire)} onChange={e => setForm(p => ({ ...p, availableForHire: e.target.value === 'true' }))} className="form-select">
+                            <option value="true">Available</option><option value="false">Not Available</option>
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">Profile Visibility</label>
+                        <select value={String(form.isPublic)} onChange={e => setForm(p => ({ ...p, isPublic: e.target.value === 'true' }))} className="form-select">
+                            <option value="true">Public</option><option value="false">Private</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div className="content-card" style={{ padding: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Social Links</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+                    {['github', 'linkedin', 'twitter'].map(k => (
+                        <div className="form-group" key={k}><label className="form-label" style={{ textTransform: 'capitalize' }}>{k}</label>
+                            <input value={form.socialLinks[k] || ''} onChange={e => setForm(p => ({ ...p, socialLinks: { ...p.socialLinks, [k]: e.target.value } }))} className="form-input" placeholder={`${k.charAt(0).toUpperCase() + k.slice(1)} URL`} />
+                        </div>
+                    ))}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <button onClick={handleSave} disabled={isSaving} className="btn-primary">{isSaving ? 'Saving...' : <><FaSave /> Save Settings</>}</button>
+                </div>
+            </div>
         </div>
     );
 };

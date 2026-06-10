@@ -541,6 +541,20 @@ img {
   gap: 1.5rem;
 }
 
+/* Responsive 2-column grid — collapses on mobile */
+.responsive-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* Responsive inline form grid — collapses on mobile */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
 .content-card {
   background: var(--bg-white);
   border-radius: 12px;
@@ -662,6 +676,66 @@ img {
   .content-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+
+  .responsive-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  /* Collapse any inline 2-column grid to 1 column on mobile */
+  div[style*="1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Ensure the top dashboard summary cards still wrap nicely */
+  div[style*="auto-fill"] {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+  }
+
+  /* Resources CMS editor full-width on mobile */
+  div[style*="minWidth: 300px"] {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Responsive helper - collapse 2-col inline grids to 1 */
+  .grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Dropdown panels become bottom sheets on mobile */
+  .dropdown-panel {
+    position: fixed !important;
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+    top: auto !important;
+    bottom: 0 !important;
+    width: auto !important;
+    max-height: 60vh !important;
+    border-radius: 12px 12px 0 0 !important;
+  }
+
+  /* Tighter header on mobile */
+  .admin-header-actions {
+    gap: 0.5rem;
+  }
+
+  .admin-header .admin-icon-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+
+  .admin-badge {
+    font-size: 0.55rem;
+    min-width: 14px;
+    height: 14px;
+    line-height: 14px;
   }
 
   /* Adjust Main Padding */

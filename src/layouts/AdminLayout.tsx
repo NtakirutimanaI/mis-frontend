@@ -239,6 +239,7 @@ const AdminLayout = () => {
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    className="dropdown-panel"
                                     style={{
                                         position: 'absolute',
                                         right: 0,
@@ -342,6 +343,7 @@ const AdminLayout = () => {
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    className="dropdown-panel"
                                     style={{
                                         position: 'absolute',
                                         right: 0,
@@ -403,7 +405,9 @@ const AdminLayout = () => {
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                deleteNotification(n.id);
+                                                                if (window.confirm('Delete this notification?')) {
+                                                                    deleteNotification(n.id);
+                                                                }
                                                             }}
                                                             title="Delete"
                                                             style={{ fontSize: '0.8rem', color: 'var(--primary-red)', background: 'transparent', padding: '2px', border: 'none', cursor: 'pointer' }}

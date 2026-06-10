@@ -157,9 +157,9 @@ const Messages = () => {
             </div>
 
             {/* Two-Panel Layout: List LEFT, Detail RIGHT */}
-            <div style={{
+            <div className="messages-layout" style={{
                 display: 'grid',
-                gridTemplateColumns: selectedMessage ? '400px 1fr' : '400px',
+                gridTemplateColumns: selectedMessage ? 'minmax(300px, 400px) 1fr' : 'minmax(300px, 400px)',
                 gap: '1.5rem',
                 flex: 1,
                 overflow: 'hidden',

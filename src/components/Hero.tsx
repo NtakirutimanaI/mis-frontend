@@ -34,7 +34,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
                         >
-                            Hello
+                            {profile.greeting || 'Hello'}
                         </motion.h1>
 
                         <motion.h3
@@ -43,7 +43,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
                         >
-                            A Bit About Me
+                            {profile.aboutMeTitle || 'A Bit About Me'}
                         </motion.h3>
 
                         <motion.p
@@ -52,7 +52,12 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
                         >
-                            {profile.bio || "I'm a paragraph. Click here to add your own text and edit me. I'm a great place for you to tell a story and let your users know a little more about you."}
+                            {(() => {
+                                const b = profile.bio;
+                                if (!b) return "I'm a paragraph. Click here to add your own text and edit me. I'm a great place for you to tell a story and let your users know a little more about you.";
+                                const ci = b.indexOf(':');
+                                return ci !== -1 ? <><strong><u>{b.slice(0, ci)}</u></strong>{b.slice(ci)}</> : b;
+                            })()}
                         </motion.p>
 
                         <motion.div
@@ -61,9 +66,16 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5 }}
                         >
-                            <a href="#resume" className="circle-btn btn-yellow">
-                                Resume
-                            </a>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                                <a href="#resume" className="circle-btn btn-yellow">
+                                    Resume
+                                </a>
+                                {profile.cvUrl && (
+                                    <a href={profile.cvUrl} download style={{ fontSize: '0.9rem', color: '#fff', background: 'var(--primary-teal)', fontWeight: 700, padding: '0.3rem 1rem', borderRadius: '20px', textDecoration: 'none', display: 'inline-block' }}>
+                                        Download CV
+                                    </a>
+                                )}
+                            </div>
                             <a href="#projects" className="circle-btn btn-red">
                                 Projects
                             </a>

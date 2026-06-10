@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { notificationService, type Notification } from '../services/notificationService';
+import { useAuth } from './AuthContext';
 
 interface NotificationContextProps {
     notifications: Notification[];
@@ -16,6 +17,7 @@ interface NotificationContextProps {
 const NotificationContext = createContext<NotificationContextProps | undefined>(undefined);
 
 export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+    const { isAuthenticated } = useAuth();
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [showNotifications, setShowNotifications] = useState(false);
@@ -57,10 +59,11 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
     // Initial load and polling every minute
     useEffect(() => {
+        if (!isAuthenticated) return;
         fetchNotifications();
         const interval = setInterval(fetchNotifications, 60000);
         return () => clearInterval(interval);
-    }, []);
+    }, [isAuthenticated]);
 
     return (
         <NotificationContext.Provider

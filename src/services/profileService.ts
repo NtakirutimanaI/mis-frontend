@@ -19,6 +19,8 @@ export interface Profile {
     username: string;
     email: string;
     bio: string;
+    greeting: string;
+    aboutMeTitle: string;
     title: string;
     type?: string;
     role?: string;
@@ -26,6 +28,7 @@ export interface Profile {
     phone: string;
     website: string;
     avatar: string;
+    cvUrl: string;
     yearsOfExperience: number;
     availableForHire: boolean;
     isPublic: boolean;
@@ -80,6 +83,7 @@ export interface Profile {
         issuer: string;
         date: string;
         credentialUrl?: string;
+        imageUrl?: string;
     }>;
     languages: Array<{
         language: string;
@@ -131,7 +135,7 @@ export const profileService = {
     },
 
     // Get admin stats
-    getStats: async (): Promise<{ projects: number; skills: number; messages: number; views: number; clients: number }> => {
+    getStats: async (): Promise<{ projects: number; skills: number; messages: number; unreadMessages: number; certifications: number; experience: number; education: number; languages: number; views: number; clients: number }> => {
         const response = await api.get('/profile/stats');
         return response.data;
     },
@@ -153,5 +157,26 @@ export const profileService = {
     // Delete all messages
     deleteAllMessages: async (): Promise<void> => {
         await api.delete('/profile/messages');
+    },
+
+    // ───── Visitor Methods ─────
+
+    recordVisit: async (data?: { name?: string; email?: string; company?: string; location?: string; page?: string; referrer?: string }): Promise<void> => {
+        await api.post('/profile/visit', data || {});
+    },
+
+    getVisitors: async (page = 1, limit = 20): Promise<{ visitors: any[]; total: number; page: number; limit: number }> => {
+        const response = await api.get(`/profile/visitors?page=${page}&limit=${limit}`);
+        return response.data;
+    },
+
+    getVisitorStats: async (): Promise<{
+        total: number; last30Days: number; last7Days: number; today: number;
+        companies: { company: string; count: number }[];
+        locations: { location: string; count: number }[];
+        pages: { page: string; count: number }[];
+    }> => {
+        const response = await api.get('/profile/visitors/stats');
+        return response.data;
     }
 };

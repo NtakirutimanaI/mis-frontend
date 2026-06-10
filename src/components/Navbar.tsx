@@ -33,11 +33,13 @@ const Navbar: React.FC<NavbarProps> = ({ profile }) => {
 
                     {/* Right: Navigation Links */}
                     <div className="navbar-links">
-                        <a href="#resume" className="nav-link">Resume</a>
+                        <a href="/#resume" className="nav-link">Resume</a>
                         <span className="nav-separator">|</span>
-                        <a href="#projects" className="nav-link">Projects</a>
+                        <a href="/#projects" className="nav-link">Projects</a>
                         <span className="nav-separator">|</span>
-                        <a href="#contact" className="nav-link">Contact</a>
+                        <a href="/#contact" className="nav-link">Contact</a>
+                        <span className="nav-separator">|</span>
+                        <Link to="/login" className="nav-link" style={{ color: '#f59e0b', fontWeight: 600 }}>Owner</Link>
                     </div>
                 </div>
             </div>

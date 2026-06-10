@@ -5,9 +5,7 @@ interface ProjectsProps {
 }
 
 const Projects: React.FC<ProjectsProps> = ({ profile }) => {
-    const projects = profile.projects || [];
-    // Show only explicitly published projects
-    const displayProjects = projects.filter(p => p.published === true);
+    const displayProjects = profile.projects || [];
 
     return (
         <section className="section" id="projects">

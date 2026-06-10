@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
 import { motion } from 'framer-motion';
-import { FaLock, FaEnvelope } from 'react-icons/fa';
+import { FaLock, FaEnvelope, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
@@ -85,7 +86,7 @@ const Login = () => {
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="form-input"
                                     style={{ paddingLeft: '3rem', width: '100%' }}
-                                    placeholder="admin@example.com"
+                                    placeholder="owneronly@gmail.com"
                                     required
                                 />
                             </div>
@@ -96,14 +97,21 @@ const Login = () => {
                             <div style={{ position: 'relative' }}>
                                 <FaLock style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                                 <input
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="form-input"
-                                    style={{ paddingLeft: '3rem', width: '100%' }}
+                                    style={{ paddingLeft: '3rem', paddingRight: '3rem', width: '100%' }}
                                     placeholder="••••••••"
                                     required
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                                >
+                                    {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                                </button>
                             </div>
                         </div>
 

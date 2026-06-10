@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
 
-import { FaSave, FaGlobe, FaTwitter, FaLinkedin, FaGithub, FaCamera } from 'react-icons/fa';
+import { FaSave, FaCamera } from 'react-icons/fa';
 import type { Profile } from '../../../services/profileService';
 import { profileService } from '../../../services/profileService';
+import { authService } from '../../../services/authService';
 import { useToast } from '../../../context/ToastContext';
 
 interface GeneralTabProps {
@@ -14,8 +15,11 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ profile, onUpdate }) => {
     const [formData, setFormData] = useState(profile);
     const [loading, setLoading] = useState(false);
     const { showToast } = useToast();
-
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [changingPassword, setChangingPassword] = useState(false);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -40,65 +44,22 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ profile, onUpdate }) => {
         }));
     };
 
-    const handleSocialChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            socialLinks: {
-                ...prev.socialLinks,
-                [name]: value,
-            },
-        }));
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            console.log('=== PROFILE UPDATE ATTEMPT ===');
-            console.log('Full form data:', JSON.stringify(formData, null, 2));
-
-            // Whitelist approach: only send fields that are allowed in UpdateProfileDto
             const updateData = {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 avatar: formData.avatar,
-                bio: formData.bio,
-                phone: formData.phone,
                 title: formData.title,
-                yearsOfExperience: formData.yearsOfExperience,
-                location: formData.location,
-                website: formData.website,
-                availableForHire: formData.availableForHire,
-                isPublic: formData.isPublic,
-                education: formData.education,
-                experience: formData.experience,
-                skills: formData.skills,
-                projects: formData.projects,
-                certifications: formData.certifications,
-                languages: formData.languages,
-                socialLinks: formData.socialLinks,
             };
 
-            console.log('Data being sent to API (whitelisted fields only):', JSON.stringify(updateData, null, 2));
-
             const updated = await profileService.updateProfile(updateData);
-
-            console.log('=== UPDATE SUCCESSFUL ===');
-            console.log('Updated profile:', updated);
-
             onUpdate(updated);
             showToast('Profile updated successfully!', 'success');
         } catch (err: any) {
-            console.error('=== UPDATE FAILED ===');
-            console.error('Full error object:', err);
-            console.error('Error response:', err.response);
-            console.error('Error response data:', err.response?.data);
-            console.error('Error message:', err.message);
-            console.error('Error status:', err.response?.status);
-            console.error('Error headers:', err.response?.headers);
-
             const errorMsg = err.response?.data?.message || err.message || 'Failed to update profile. Please try again.';
             showToast(Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg, 'error');
         } finally {
@@ -106,17 +67,47 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ profile, onUpdate }) => {
         }
     };
 
+    const handleChangePassword = async () => {
+        if (!currentPassword || !newPassword) { showToast('Fill both password fields', 'error'); return; }
+        if (newPassword.length < 6) { showToast('New password must be at least 6 characters', 'error'); return; }
+        setChangingPassword(true);
+        try {
+            await authService.changePassword({ currentPassword, newPassword });
+            showToast('Password changed successfully', 'success');
+            setCurrentPassword('');
+            setNewPassword('');
+        } catch (err: any) {
+            const errorMsg = err.response?.data?.message || err.message || 'Failed to change password';
+            showToast(errorMsg, 'error');
+        } finally {
+            setChangingPassword(false);
+        }
+    };
+
     return (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
 
+            <div className="content-card" style={{ padding: '1.5rem', maxWidth: '500px' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Change Password</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
+                    <div className="form-group">
+                        <label className="form-label">Current Password</label>
+                        <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="form-input" placeholder="123Rw@nd@" />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">New Password</label>
+                        <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="form-input" placeholder="Enter new password" />
+                    </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <button type="button" onClick={handleChangePassword} disabled={changingPassword} className="btn-primary" style={{ background: 'var(--primary-teal)' }}>
+                        {changingPassword ? 'Changing...' : 'Change Password'}
+                    </button>
+                </div>
+            </div>
 
-            <div className="content-card">
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-                    Basic Information
-                </h3>
-
-                {/* Avatar Section */}
-                <div style={{ display: 'flex', gap: '2rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div className="content-card" style={{ flex: 1 }}>
+                <div style={{ display: 'flex', gap: '2rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' }}>
                     <input
                         type="file"
                         ref={fileInputRef}
@@ -144,25 +135,9 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ profile, onUpdate }) => {
                             <FaCamera size={14} />
                         </div>
                     </div>
-                    <div style={{ flex: 1, minWidth: '250px' }}>
-                        <div className="form-group">
-                            <label className="form-label">Profile Image (Upload or URL)</label>
-                            <input
-                                name="avatar"
-                                value={formData.avatar || ''}
-                                onChange={handleChange}
-                                placeholder="https://example.com/my-photo.jpg (or click avatar to upload)"
-                                className="form-input"
-                                style={{ width: '100%' }}
-                            />
-                            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem', lineHeight: '1.4' }}>
-                                Click the circle to upload an image from your device (max 2MB), or paste a direct URL.
-                            </p>
-                        </div>
-                    </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
                     <div className="form-group">
                         <label className="form-label">First Name</label>
                         <input
@@ -190,123 +165,21 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ profile, onUpdate }) => {
                             className="form-input"
                         />
                     </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                     <div className="form-group">
-                        <label className="form-label">Experience (Years)</label>
-                        <input
-                            name="yearsOfExperience"
-                            type="number"
-                            value={formData.yearsOfExperience}
-                            onChange={handleChange}
-                            className="form-input"
-                        />
+                        <label className="form-label">Email (Username)</label>
+                        <input value={profile.email || ''} className="form-input" disabled style={{ opacity: 0.6 }} />
                     </div>
                 </div>
 
-                <div className="form-group">
-                    <label className="form-label">Bio (Markdown Supported)</label>
-                    <textarea
-                        name="bio"
-                        value={formData.bio}
-                        onChange={handleChange}
-                        className="form-textarea"
-                        rows={6}
-                    />
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="btn-primary"
+                    >
+                        {loading ? 'Saving...' : <><FaSave /> Save Changes</>}
+                    </button>
                 </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                    <div className="form-group">
-                        <label className="form-label">Location</label>
-                        <input
-                            name="location"
-                            value={formData.location}
-                            onChange={handleChange}
-                            className="form-input"
-                        />
-                    </div>
-                    <div className="form-group">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                            <label className="form-label mb-0">Availability Status</label>
-                            <span style={{ fontSize: '0.85rem', color: formData.availableForHire ? 'var(--primary-teal)' : 'var(--text-muted)' }}>
-                                {formData.availableForHire ? "Available to Hire" : "Not Available"}
-                            </span>
-                        </div>
-                        <select
-                            name="availableForHire"
-                            value={String(formData.availableForHire)}
-                            onChange={(e) => setFormData(prev => ({ ...prev, availableForHire: e.target.value === 'true' }))}
-                            className="form-select"
-                        >
-                            <option value="true">Available for Hire</option>
-                            <option value="false">Currently Employed / Unavailable</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div className="content-card">
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-                    Social Links & Config
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <div style={{ position: 'relative' }}>
-                        <FaGithub style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                        <input
-                            name="github"
-                            value={formData.socialLinks?.github || ''}
-                            onChange={handleSocialChange}
-                            placeholder="GitHub URL"
-                            className="form-input"
-                            style={{ paddingLeft: '2.5rem', width: '100%' }}
-                        />
-                    </div>
-                    <div style={{ position: 'relative' }}>
-                        <FaLinkedin style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                        <input
-                            name="linkedin"
-                            value={formData.socialLinks?.linkedin || ''}
-                            onChange={handleSocialChange}
-                            placeholder="LinkedIn URL"
-                            className="form-input"
-                            style={{ paddingLeft: '2.5rem', width: '100%' }}
-                        />
-                    </div>
-                    <div style={{ position: 'relative' }}>
-                        <FaTwitter style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                        <input
-                            name="twitter"
-                            value={formData.socialLinks?.twitter || ''}
-                            onChange={handleSocialChange}
-                            placeholder="Twitter URL"
-                            className="form-input"
-                            style={{ paddingLeft: '2.5rem', width: '100%' }}
-                        />
-                    </div>
-                    <div style={{ position: 'relative' }}>
-                        <FaGlobe style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                        <input
-                            name="website"
-                            value={formData.website || ''}
-                            onChange={handleChange}
-                            placeholder="Personal Website URL"
-                            className="form-input"
-                            style={{ paddingLeft: '2.5rem', width: '100%' }}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <div style={{ position: 'sticky', bottom: '1.5rem', zIndex: 10, display: 'flex', justifyContent: 'flex-end' }}>
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn-primary"
-                    style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
-                >
-                    {loading ? 'Saving...' : <><FaSave /> Save Changes</>}
-                </button>
             </div>
         </form>
     );

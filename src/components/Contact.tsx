@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { profileService, type ContactMessage, type Profile } from '../services/profileService';
+import { useToast } from '../context/ToastContext';
 
 interface ContactProps {
     profile: Profile;
 }
 
 const Contact: React.FC<ContactProps> = ({ profile }) => {
+    const { showToast } = useToast();
     // Local state for form fields including split name
     const [localData, setLocalData] = useState({
         firstName: '',
@@ -60,16 +62,10 @@ const Contact: React.FC<ContactProps> = ({ profile }) => {
             }, 5000);
         } catch (error: any) {
             console.error('❌ Failed to send message:', error);
-            const errorDetails = {
-                message: error?.message,
-                status: error?.response?.status,
-                statusText: error?.response?.statusText,
-                data: error?.response?.data,
-                validationErrors: error?.response?.data?.message
-            };
-            console.error('Error details:', errorDetails);
-            (window as any).__lastContactError = errorDetails;
+            const errMsg = error?.response?.data?.message;
+            const displayMsg = Array.isArray(errMsg) ? errMsg.join('. ') : (errMsg || error?.message || 'Something went wrong');
             setStatus('error');
+            showToast(displayMsg, 'error');
 
             // Reset error message after 5 seconds
             setTimeout(() => {
@@ -107,28 +103,28 @@ const Contact: React.FC<ContactProps> = ({ profile }) => {
                             <div className="form-row">
                                 <div className="form-group">
                                     <label className="form-label">First Name *</label>
-                                    <input type="text" name="firstName" className="form-input" required value={localData.firstName} onChange={handleChange} />
+                                    <input type="text" name="firstName" className="form-input" required value={localData.firstName} onChange={handleChange} placeholder="John" />
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Last Name *</label>
-                                    <input type="text" name="lastName" className="form-input" required value={localData.lastName} onChange={handleChange} />
+                                    <input type="text" name="lastName" className="form-input" required value={localData.lastName} onChange={handleChange} placeholder="Doe" />
                                 </div>
                             </div>
 
                             <div className="form-row">
                                 <div className="form-group">
                                     <label className="form-label">Email *</label>
-                                    <input type="email" name="email" className="form-input" required value={localData.email} onChange={handleChange} />
+                                    <input type="email" name="email" className="form-input" required value={localData.email} onChange={handleChange} placeholder="john@example.com" />
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Subject</label>
-                                    <input type="text" name="subject" className="form-input" value={localData.subject} onChange={handleChange} />
+                                    <input type="text" name="subject" className="form-input" value={localData.subject} onChange={handleChange} placeholder="What's this about?" />
                                 </div>
                             </div>
 
                             <div className="form-group">
                                 <label className="form-label">Message</label>
-                                <textarea name="message" className="form-textarea" required value={localData.message} onChange={handleChange} rows={6}></textarea>
+                                <textarea name="message" className="form-textarea" required value={localData.message} onChange={handleChange} rows={6} placeholder="Tell me about your project..."></textarea>
                             </div>
 
                             <button type="submit" className="btn-submit" disabled={status === 'loading'}>
@@ -141,21 +137,9 @@ const Contact: React.FC<ContactProps> = ({ profile }) => {
                                 </p>
                             )}
                             {status === 'error' && (
-                                <div style={{ marginTop: '1rem' }}>
-                                    <p style={{ color: 'red', fontWeight: 600 }}>
-                                        ❌ Failed to send message. Please check the following:
-                                    </p>
-                                    <pre style={{
-                                        background: '#fee',
-                                        padding: '1rem',
-                                        borderRadius: '4px',
-                                        fontSize: '0.85rem',
-                                        overflow: 'auto',
-                                        maxHeight: '200px'
-                                    }}>
-                                        {JSON.stringify((window as any).__lastContactError, null, 2)}
-                                    </pre>
-                                </div>
+                                <p style={{ color: 'red', marginTop: '1rem', fontWeight: 600 }}>
+                                    ❌ Failed to send message. Please try again.
+                                </p>
                             )}
                         </form>
                     </div>

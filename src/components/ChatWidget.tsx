@@ -274,7 +274,7 @@ const ChatWidget = () => {
                                     <div style={{ fontSize: '0.7rem', color: '#4ade80' }}>Online</div>
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '10px' }}>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                                 <button onClick={() => setView('settings')} title="Settings" style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }}>
                                     <FaEnvelope />
                                 </button>
@@ -283,6 +283,10 @@ const ChatWidget = () => {
                                 </button>
                                 <button onClick={() => startNewChat(true)} title="New Chat" style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                                     <FaPlus size={12} />
+                                </button>
+                                <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.3)' }} />
+                                <button onClick={() => setIsOpen(false)} title="Close" style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <FaTimes size={16} />
                                 </button>
                             </div>
                         </div>
