@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaLock, FaEnvelope, FaEye, FaEyeSlash } from 'react-icons/fa';
 
@@ -125,8 +126,11 @@ const Login = () => {
                         </button>
                     </form>
 
-                    <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-                        <a href="/" style={{ color: 'var(--text-muted)', fontSize: '0.9rem', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                    <div style={{ marginTop: '1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 700, fontSize: '0.9rem' }}>
+                            Don't have an account? Register
+                        </Link>
+                        <a href="/" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
                             ← Back to Portfolio
                         </a>
                     </div>

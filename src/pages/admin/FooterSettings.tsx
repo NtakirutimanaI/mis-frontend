@@ -59,6 +59,8 @@ const FooterSettings = () => {
                 },
                 poweredBy: footerData.poweredByText
             });
+            await profileService.getMyProfile();
+            window.dispatchEvent(new CustomEvent('profile-updated'));
             showToast('Footer settings saved successfully!', 'success');
         } catch (error) {
             console.error('Failed to save footer settings', error);

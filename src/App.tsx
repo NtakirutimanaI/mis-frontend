@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Public Pages
 import Home from './pages/public/Home';
 import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -18,6 +19,7 @@ import ApiDocs from './pages/admin/ApiDocs';
 import Messages from './pages/admin/Messages';
 import Resources from './pages/admin/Resources';
 import FooterSettings from './pages/admin/FooterSettings';
+import Users from './pages/admin/Users';
 
 import Settings from './pages/admin/Settings';
 
@@ -48,6 +50,10 @@ function App() {
     };
 
     fetchProfile();
+
+    const handleProfileUpdate = () => { fetchProfile(); };
+    window.addEventListener('profile-updated', handleProfileUpdate);
+    return () => window.removeEventListener('profile-updated', handleProfileUpdate);
   }, []);
 
   if (loading) {
@@ -72,6 +78,7 @@ function App() {
               {/* Auth Routes */}
               <Route element={<PublicLayout profile={profile} />}>
                 <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
               </Route>
 
               {/* Admin Routes */}
@@ -85,6 +92,7 @@ function App() {
                   <Route path="/admin/messages" element={<Messages />} />
                   <Route path="/admin/resources" element={<Resources />} />
                   <Route path="/admin/footer-settings" element={<FooterSettings />} />
+                  <Route path="/admin/users" element={<Users />} />
                   <Route path="/admin/settings" element={<Settings />} />
                 </Route>
               </Route>

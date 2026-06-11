@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
     FaChartBar, FaUser, FaEnvelope, FaSignOutAlt, FaCog, FaBook,
     FaSearch, FaPlus, FaBell, FaDatabase, FaMoon, FaSun,
-    FaCheck, FaTrash, FaTimes, FaProjectDiagram, FaBars, FaGlobe
+    FaCheck, FaTrash, FaTimes, FaProjectDiagram, FaBars, FaGlobe, FaUsers
 } from 'react-icons/fa';
 import { useNotification } from '../context/NotificationContext';
 import { profileService, type Profile, type ContactMessage } from '../services/profileService';
@@ -124,6 +124,7 @@ const AdminLayout = () => {
         { path: '/admin/api-docs', icon: <FaBook />, label: 'API Docs' },
         { path: '/admin/messages', icon: <FaEnvelope />, label: 'Messages' },
         { path: '/admin/footer-settings', icon: <FaGlobe />, label: 'Footer' },
+        { path: '/admin/users', icon: <FaUsers />, label: 'Users' },
         { path: '/admin/settings', icon: <FaCog />, label: 'Settings' },
     ];
 

@@ -15,4 +15,9 @@ export const authService = {
         const response = await api.post('/auth/change-password', data);
         return response.data;
     },
+
+    getAllUsers: async () => {
+        const response = await api.get('/auth/users');
+        return response.data;
+    },
 };
