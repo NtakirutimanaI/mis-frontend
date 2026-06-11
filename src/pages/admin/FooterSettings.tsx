@@ -233,7 +233,7 @@ const FooterSettings = () => {
                             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{footerData.email || 'Not set'}</p>
                         </div>
                         <div>
-                            <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem' }}>Follow Me</h4>
+                            <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem' }}>Follow Us</h4>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                 {footerData.linkedinUrl && <span style={{ fontSize: '0.85rem' }}>LinkedIn</span>}
                                 {footerData.twitterUrl && <span style={{ fontSize: '0.85rem' }}>Twitter</span>}

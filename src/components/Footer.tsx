@@ -38,7 +38,7 @@ const Footer: React.FC<FooterProps> = ({ profile }) => {
                         <p>{profile.email}</p>
                     </div>
                     <div className="footer-item">
-                        <h4>Follow Me</h4>
+                        <h4>Follow Us</h4>
                         <div className="footer-social">
                             {profile.socialLinks.linkedin && <a href={profile.socialLinks.linkedin} target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>}
                             {profile.socialLinks.twitter && <a href={profile.socialLinks.twitter} target="_blank" rel="noopener noreferrer"><FaTwitter /></a>}
