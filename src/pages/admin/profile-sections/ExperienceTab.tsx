@@ -216,7 +216,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ profile, onUpdate, search
             <section>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <FaGraduationCap style={{ color: 'var(--primary-yellow)' }} /> Education
+                        <FaGraduationCap style={{ color: 'var(--primary)' }} /> Education
                     </h3>
                     <button onClick={startNewEdu} disabled={editEduIndex !== null || loading} className="btn-primary" style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}>
                         <FaPlus /> Add
@@ -231,7 +231,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ profile, onUpdate, search
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
                             className="content-card"
-                            style={{ marginBottom: '1.5rem', border: '1px solid var(--primary-yellow)' }}
+                            style={{ marginBottom: '1.5rem', border: '1px solid var(--primary)' }}
                         >
                             <h4 style={{ fontWeight: 700, marginBottom: '1rem' }}>{editEduIndex === -1 ? 'Add Education' : 'Edit Education'}</h4>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
@@ -271,7 +271,7 @@ const ExperienceTab: React.FC<ExperienceTabProps> = ({ profile, onUpdate, search
                         <div key={i} className="content-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                             <div>
                                 <h4 style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.2rem' }}>{edu.degree}</h4>
-                                <div style={{ color: 'var(--primary-yellow)', fontWeight: 500, marginBottom: '0.2rem' }}>{edu.institution}</div>
+                                <div style={{ color: 'var(--primary)', fontWeight: 500, marginBottom: '0.2rem' }}>{edu.institution}</div>
                                 <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{edu.graduationYear}</div>
                             </div>
                             <div style={{ display: 'flex', gap: '10px' }}>

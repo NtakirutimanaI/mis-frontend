@@ -14,9 +14,9 @@ import { useToast } from '../../context/ToastContext';
 type SectionId = 'intro' | 'experience' | 'education' | 'skills' | 'projects' | 'certifications' | 'languages' | 'settings';
 
 const SECTION_COLORS: Record<string, string> = {
-    intro: 'var(--primary-yellow)', experience: 'var(--primary-teal)', education: 'var(--primary-yellow)',
+    intro: 'var(--primary)', experience: 'var(--primary-teal)', education: 'var(--primary)',
     skills: 'var(--primary-red)', projects: 'var(--primary-teal)', certifications: '#764ba2',
-    languages: '#f093fb', settings: 'var(--primary-yellow)',
+    languages: '#f093fb', settings: 'var(--primary)',
 };
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
@@ -497,7 +497,7 @@ const ProjectsEditor = ({ projects, onSave, saving, searchQuery }: { projects: P
             <AnimatePresence>
                 {editingIndex !== null && form && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-                        className="content-card" style={{ border: '2px solid var(--primary-yellow)', marginBottom: '2rem', padding: '1.5rem' }}
+                        className="content-card" style={{ border: '2px solid var(--primary)', marginBottom: '2rem', padding: '1.5rem' }}
                     >
                         <h4 style={{ fontWeight: 800, marginBottom: '1rem' }}>{editingIndex === -1 ? 'New Project' : 'Edit Project'}</h4>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>

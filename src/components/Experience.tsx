@@ -14,15 +14,15 @@ const Experience: React.FC<ExperienceProps> = ({ profile }) => {
         <section className="section" id="resume">
             <div className="container">
                 <div style={{ marginBottom: '4rem' }}>
-                    <h1 style={{ fontSize: '3rem', fontWeight: 800 }}>Resume</h1>
+                    <h1 style={{ fontSize: '3rem', fontWeight: 800 }}>About MIS</h1>
                     <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
                         {profile.yearsOfExperience} years of experience as {profile.title}
                     </p>
                 </div>
 
-                {/* Work Experience */}
+                {/* How We Work */}
                 <div className="resume-section">
-                    <div className="resume-title">Work<br />Experience</div>
+                    <div className="resume-title">How<br />We Work</div>
                     <div className="resume-list">
                         {profile.experience.map((exp, idx) => (
                             <div key={idx} className="resume-item">
@@ -40,9 +40,9 @@ const Experience: React.FC<ExperienceProps> = ({ profile }) => {
                     </div>
                 </div>
 
-                {/* Stacks Used */}
+                {/* Our Technologies */}
                 <div className="resume-section" style={{ borderTop: '1px solid #e0e0e0', paddingTop: '4rem' }}>
-                    <div className="resume-title">Technical<br />Skills</div>
+                    <div className="resume-title">Our<br />Technologies</div>
                     <div className="resume-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
                         {Object.entries(profile.skills || {}).filter(([category]) =>
                             !['other'].includes(category)
@@ -68,10 +68,10 @@ const Experience: React.FC<ExperienceProps> = ({ profile }) => {
 
                 <div style={{ height: '4rem' }}></div>
 
-                {/* Education */}
+                {/* Working Hours */}
                 {profile.education && profile.education.length > 0 && (
                     <div className="resume-section" style={{ borderTop: '1px solid #e0e0e0', paddingTop: '4rem' }}>
-                        <div className="resume-title">Education</div>
+                        <div className="resume-title">Working Hours</div>
                         <div className="resume-list">
                             {profile.education.map((edu, idx) => (
                                 <div key={idx} className="resume-item">

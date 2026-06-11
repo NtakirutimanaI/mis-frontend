@@ -68,7 +68,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                         >
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                                 <a href="#resume" className="circle-btn btn-yellow">
-                                    Resume
+                                    About MIS
                                 </a>
                                 {profile.cvUrl && (
                                     <a href={profile.cvUrl} download style={{ fontSize: '0.9rem', color: '#fff', background: 'var(--primary-teal)', fontWeight: 700, padding: '0.3rem 1rem', borderRadius: '20px', textDecoration: 'none', display: 'inline-block' }}>

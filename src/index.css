@@ -18,7 +18,7 @@
 
   --border-color: #e0e0e0;
 
-  --primary-yellow: #f8b400;
+  --primary: #7BC043;
   --primary-red: #ff5252;
   --primary-teal: #4ecdc4;
 
@@ -137,7 +137,7 @@ img {
 .nav-logo-dot {
   width: 12px;
   height: 12px;
-  background: var(--primary-yellow);
+  background: var(--primary);
   border-radius: 50%;
   display: inline-block;
 }
@@ -237,7 +237,7 @@ img {
 }
 
 .btn-yellow {
-  background: var(--primary-yellow);
+  background: var(--primary);
 }
 
 .btn-red {
@@ -249,8 +249,7 @@ img {
 }
 
 .btn-orange {
-  background: #ff9800;
-  /* Distinct orange if needed, otherwise yellow covers it */
+  background: var(--primary);
 }
 
 /* -- Forms -- */
@@ -295,13 +294,13 @@ img {
 
 .form-input:focus,
 .form-textarea:focus {
-  border-color: var(--primary-yellow);
+  border-color: var(--primary);
 }
 
 .btn-submit {
   width: 100%;
   padding: 0.7rem;
-  background: var(--primary-yellow);
+  background: var(--primary);
   color: #000;
   border: none;
   font-weight: 700;
@@ -370,7 +369,7 @@ img {
 }
 
 .admin-nav-item.active {
-  background: var(--primary-yellow);
+  background: var(--primary);
   color: #000;
   font-weight: 700;
 }
@@ -430,7 +429,7 @@ img {
 }
 
 .admin-search-input:focus {
-  border-color: var(--primary-yellow);
+  border-color: var(--primary);
 }
 
 .admin-header-actions {
@@ -564,7 +563,7 @@ img {
 }
 
 .btn-primary {
-  background: var(--primary-yellow);
+  background: var(--primary);
   color: #000;
   border: none;
   padding: 0.8rem 1.5rem;
@@ -1085,7 +1084,7 @@ img {
 .brand-dot {
   width: 32px;
   height: 32px;
-  background-color: var(--primary-yellow);
+  background-color: var(--primary);
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -1252,7 +1251,7 @@ img {
 }
 
 .btn-yellow {
-  background-color: var(--primary-yellow);
+  background-color: var(--primary);
 }
 
 .btn-red {

@@ -266,7 +266,7 @@ const ChatWidget = () => {
                         {/* Header */}
                         <div style={{ padding: '0.8rem 1rem', background: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--primary-yellow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <FaRobot style={{ color: '#000', fontSize: '14px' }} />
                                 </div>
                                 <div>
@@ -395,7 +395,7 @@ const ChatWidget = () => {
                                                     padding: '0.8rem',
                                                     borderRadius: '8px',
                                                     cursor: 'pointer',
-                                                    border: sess.id === sessionId ? '2px solid var(--primary-yellow)' : '1px solid #ddd',
+                                                    border: sess.id === sessionId ? '2px solid var(--primary)' : '1px solid #ddd',
                                                     transition: 'transform 0.2s',
                                                 }}
                                             >

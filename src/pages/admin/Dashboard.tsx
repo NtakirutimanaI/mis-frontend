@@ -62,7 +62,7 @@ const AdminDashboard = () => {
 
     const summaryCards = [
         { label: 'Total Visitors', value: visitorStats?.total ?? 0, icon: <FaEye />, color: '#3b82f6', sub: `${visitorStats?.today ?? 0} today` },
-        { label: 'Messages', value: stats?.messages ?? 0, icon: <FaEnvelope />, color: '#f97316', sub: `${stats?.unreadMessages ?? 0} unread` },
+        { label: 'Messages', value: stats?.messages ?? 0, icon: <FaEnvelope />, color: '#7BC043', sub: `${stats?.unreadMessages ?? 0} unread` },
         { label: 'Projects', value: stats?.projects ?? 0, icon: <FaProjectDiagram />, color: '#8b5cf6', sub: 'portfolio items' },
         { label: 'Skills', value: stats?.skills ?? 0, icon: <FaCode />, color: '#22c55e', sub: 'across all categories' },
     ];
@@ -71,7 +71,7 @@ const AdminDashboard = () => {
         { label: 'Certifications', value: stats?.certifications ?? 0, icon: <FaCertificate />, color: '#22c55e', link: '/admin/resources' },
         { label: 'Languages', value: stats?.languages ?? 0, icon: <FaLanguage />, color: '#06b6d4', link: '/admin/resources' },
         { label: 'Experience', value: stats?.experience ?? 0, icon: <FaBriefcase />, color: '#ec4899', link: '/admin/resources' },
-        { label: 'Education', value: stats?.education ?? 0, icon: <FaGraduationCap />, color: '#f59e0b', link: '/admin/resources' },
+        { label: 'Education', value: stats?.education ?? 0, icon: <FaGraduationCap />, color: '#7BC043', link: '/admin/resources' },
     ];
 
     return (
@@ -126,7 +126,7 @@ const AdminDashboard = () => {
                 {/* Visitor Companies */}
                 <div className="content-card" style={{ padding: '1.5rem' }}>
                     <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <FaBuilding style={{ color: '#f97316' }} /> Visitor Companies
+                        <FaBuilding style={{ color: '#7BC043' }} /> Visitor Companies
                     </h3>
                     {visitorStats?.companies && visitorStats.companies.length > 0 ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -181,7 +181,7 @@ const AdminDashboard = () => {
                 {/* Portfolio Sections */}
                 <div className="content-card" style={{ padding: '1.5rem' }}>
                     <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <FaChartLine style={{ color: 'var(--primary-yellow)' }} /> Portfolio Sections
+                        <FaChartLine style={{ color: 'var(--primary)' }} /> Portfolio Sections
                     </h3>
                     <div className="form-grid-2">
                         {sectionCards.map(card => (
@@ -232,11 +232,11 @@ const AdminDashboard = () => {
 
                 <div className="content-card" style={{ padding: '1.5rem' }}>
                     <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <FaClock style={{ color: 'var(--primary-yellow)' }} /> Quick Actions
+                        <FaClock style={{ color: 'var(--primary)' }} /> Quick Actions
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                         {[
-                            { to: '/admin/resources', icon: <FaProjectDiagram />, bg: '#f9731515', color: '#f97316', title: 'Manage Portfolio', sub: 'Edit projects, skills, certifications' },
+                            { to: '/admin/resources', icon: <FaProjectDiagram />, bg: '#7bc04315', color: '#7BC043', title: 'Manage Portfolio', sub: 'Edit projects, skills, certifications' },
                             { to: '/admin/messages', icon: <FaEnvelope />, bg: '#3b82f615', color: '#3b82f6', title: 'View Messages', sub: 'Check contact form submissions' },
                             { to: '/admin/profile', icon: <FaUser />, bg: '#22c55e15', color: '#22c55e', title: 'Update Profile', sub: 'Change your personal info' },
                         ].map(action => (

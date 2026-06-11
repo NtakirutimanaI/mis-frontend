@@ -218,7 +218,7 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ profile, onUpdate, searchQuer
     // Helper for effectiveness color
     const getEffectivenessColor = (score: number) => {
         if (score < 50) return 'var(--primary-red)';
-        if (score < 80) return 'var(--primary-yellow)';
+        if (score < 80) return 'var(--primary)';
         return 'var(--primary-teal)'; // Success
     };
 
@@ -306,7 +306,7 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ profile, onUpdate, searchQuer
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
                         className="content-card"
-                        style={{ border: '2px solid var(--primary-yellow)', marginBottom: '2rem' }}
+                        style={{ border: '2px solid var(--primary)', marginBottom: '2rem' }}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
                             <h4 style={{ fontWeight: 800, fontSize: '1.1rem' }}>
@@ -407,7 +407,7 @@ const ProjectsTab: React.FC<ProjectsTabProps> = ({ profile, onUpdate, searchQuer
                                             fontSize: '0.85rem',
                                             borderRadius: '8px',
                                             border: '1px solid var(--border-color)',
-                                            background: editForm.imageUrl ? 'var(--primary-yellow)' : 'transparent',
+                                            background: editForm.imageUrl ? 'var(--primary)' : 'transparent',
                                             color: editForm.imageUrl ? '#000' : 'inherit'
                                         }}
                                     >

@@ -225,7 +225,7 @@ const Settings = () => {
                     {/* Portfolio Settings */}
                     <div className="content-card" style={{ padding: '1.5rem' }}>
                         <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <FaGlobe style={{ color: 'var(--primary-yellow)' }} /> Portfolio Settings
+                            <FaGlobe style={{ color: 'var(--primary)' }} /> Portfolio Settings
                         </h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <SettingToggle
@@ -242,7 +242,7 @@ const Settings = () => {
                                 description="Enable visitors to send you messages"
                                 checked={settings.allowMessages}
                                 onChange={(val) => handleSettingToggle('allowMessages', val)}
-                                color="var(--primary-yellow)"
+                                color="var(--primary)"
                             />
                             <SettingToggle
                                 icon={<FaEye />}
@@ -313,7 +313,7 @@ const Settings = () => {
                     {/* Session Management */}
                     <div className="content-card" style={{ padding: '1.5rem' }}>
                         <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <FaKey style={{ color: 'var(--primary-yellow)' }} /> Session Management
+                            <FaKey style={{ color: 'var(--primary)' }} /> Session Management
                         </h3>
                         <div style={{ padding: '1rem', background: 'var(--bg-body)', borderRadius: '8px', marginBottom: '1rem' }}>
                             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
@@ -345,7 +345,7 @@ const Settings = () => {
                                 description="Receive email notifications for new messages"
                                 checked={settings.enableNotifications}
                                 onChange={(val) => handleSettingToggle('enableNotifications', val)}
-                                color="var(--primary-yellow)"
+                                color="var(--primary)"
                             />
                             <div style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid var(--primary-red)', borderRadius: '8px', marginTop: '1rem' }}>
                                 <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--primary-red)' }}>
@@ -378,7 +378,7 @@ const Settings = () => {
                 >
                     <div className="content-card" style={{ padding: '1.5rem' }}>
                         <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <FaPaintBrush style={{ color: 'var(--primary-yellow)' }} /> UI Preferences
+                            <FaPaintBrush style={{ color: 'var(--primary)' }} /> UI Preferences
                         </h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <SettingToggle
@@ -427,7 +427,7 @@ const Settings = () => {
                                     </button>
                                     <button
                                         className="btn-primary"
-                                        style={{ background: 'var(--primary-yellow)', width: '100%' }}
+                                        style={{ background: 'var(--primary)', width: '100%' }}
                                         onClick={() => showToast('Database optimized', 'success')}
                                     >
                                         <FaDatabase /> Optimize Database

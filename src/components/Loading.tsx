@@ -22,7 +22,7 @@ const Loading = () => {
                         margin: '0 auto 1.5rem',
                         borderRadius: '50%',
                         border: '5px solid var(--border-color)',
-                        borderTopColor: 'var(--primary-yellow)'
+                        borderTopColor: 'var(--primary)'
                     }}
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -31,7 +31,7 @@ const Loading = () => {
                     style={{
                         fontSize: '1.5rem',
                         fontWeight: 800,
-                        background: 'linear-gradient(135deg, var(--primary-red), var(--primary-yellow))',
+                        background: 'linear-gradient(135deg, var(--primary-red), var(--primary))',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         marginBottom: '0.5rem'

@@ -124,7 +124,7 @@ const Messages = () => {
                             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
                                 Unread
                             </p>
-                            <p style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--primary-yellow)' }}>
+                            <p style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--primary)' }}>
                                 {unreadCount}
                             </p>
                         </div>
@@ -140,8 +140,8 @@ const Messages = () => {
                                     padding: '0.4rem 0.9rem',
                                     borderRadius: '6px',
                                     fontSize: '0.85rem',
-                                    border: filter === f ? '2px solid var(--primary-yellow)' : '1px solid var(--border-color)',
-                                    background: filter === f ? 'rgba(248, 180, 0, 0.1)' : 'var(--bg-white)',
+                                    border: filter === f ? '2px solid var(--primary)' : '1px solid var(--border-color)',
+                                    background: filter === f ? 'rgba(123, 192, 67, 0.1)' : 'var(--bg-white)',
                                     color: filter === f ? 'var(--text-main)' : 'var(--text-muted)',
                                     fontWeight: filter === f ? 600 : 400,
                                     cursor: 'pointer',
@@ -203,8 +203,8 @@ const Messages = () => {
                                         padding: '1.5rem 1.5rem',
                                         minHeight: '140px',
                                         borderBottom: '1px solid var(--border-color)',
-                                        borderLeft: `3px solid ${!msg.status || msg.status === 'unread' || msg.status === 'new' ? 'var(--primary-yellow)' : 'transparent'}`,
-                                        background: selectedMessage?.id === msg.id ? 'rgba(248, 180, 0, 0.08)' : 'var(--bg-white)',
+                                        borderLeft: `3px solid ${!msg.status || msg.status === 'unread' || msg.status === 'new' ? 'var(--primary)' : 'transparent'}`,
+                                        background: selectedMessage?.id === msg.id ? 'rgba(123, 192, 67, 0.08)' : 'var(--bg-white)',
                                         cursor: 'pointer',
                                         transition: 'all 0.2s',
                                         display: 'flex',
@@ -236,7 +236,7 @@ const Messages = () => {
                                                 width: '8px',
                                                 height: '8px',
                                                 borderRadius: '50%',
-                                                background: 'var(--primary-yellow)',
+                                                background: 'var(--primary)',
                                                 flexShrink: 0
                                             }} />
                                         )}
@@ -299,8 +299,8 @@ const Messages = () => {
                                     borderRadius: '12px',
                                     fontSize: '0.7rem',
                                     fontWeight: 600,
-                                    background: !selectedMessage.status || selectedMessage.status === 'unread' || selectedMessage.status === 'new' ? 'rgba(248, 180, 0, 0.15)' : 'rgba(0, 128, 128, 0.15)',
-                                    color: !selectedMessage.status || selectedMessage.status === 'unread' || selectedMessage.status === 'new' ? 'var(--primary-yellow)' : 'var(--primary-teal)',
+                                    background: !selectedMessage.status || selectedMessage.status === 'unread' || selectedMessage.status === 'new' ? 'rgba(123, 192, 67, 0.15)' : 'rgba(0, 128, 128, 0.15)',
+                                    color: !selectedMessage.status || selectedMessage.status === 'unread' || selectedMessage.status === 'new' ? 'var(--primary)' : 'var(--primary-teal)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '0.4rem'
@@ -347,7 +347,7 @@ const Messages = () => {
                                         width: '50px',
                                         height: '50px',
                                         borderRadius: '50%',
-                                        background: 'linear-gradient(135deg, var(--primary-yellow) 0%, var(--primary-teal) 100%)',
+                                        background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-teal) 100%)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',

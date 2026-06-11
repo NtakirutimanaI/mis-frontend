@@ -39,7 +39,7 @@ const Navbar: React.FC<NavbarProps> = ({ profile }) => {
                         <span className="nav-separator">|</span>
                         <a href="/#contact" className="nav-link">Contact</a>
                         <span className="nav-separator">|</span>
-                        <Link to="/login" className="nav-link" style={{ color: '#f59e0b', fontWeight: 600 }}>Login</Link>
+                        <Link to="/login" className="nav-link" style={{ color: '#7BC043', fontWeight: 600 }}>Login</Link>
                     </div>
                 </div>
             </div>

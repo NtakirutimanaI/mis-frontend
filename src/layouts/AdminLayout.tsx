@@ -153,7 +153,7 @@ const AdminLayout = () => {
                     </button>
                     {/* Brand Logo */}
                     <Link to="/" className="admin-brand">
-                        <span style={{ width: '12px', height: '12px', background: 'var(--primary-yellow)', borderRadius: '50%', display: 'inline-block' }}></span>
+                        <span style={{ width: '12px', height: '12px', background: 'var(--primary)', borderRadius: '50%', display: 'inline-block' }}></span>
                         MIS Panel
                     </Link>
 
@@ -175,7 +175,7 @@ const AdminLayout = () => {
                         <button
                             title="Create New"
                             onClick={() => setShowAddMenu(!showAddMenu)}
-                            style={{ width: '35px', height: '35px', background: 'var(--primary-yellow)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', cursor: 'pointer', border: 'none' }}
+                            style={{ width: '35px', height: '35px', background: 'var(--primary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', cursor: 'pointer', border: 'none' }}
                         >
                             <FaPlus size={12} />
                         </button>
@@ -215,7 +215,7 @@ const AdminLayout = () => {
                                         New Skill
                                     </Link>
                                     <Link to="/admin/resources" onClick={() => setShowAddMenu(false)} className="dropdown-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '8px', color: 'var(--text-main)', textDecoration: 'none', fontSize: '0.9rem' }}>
-                                        <div style={{ width: '24px', height: '24px', background: '#ffedd5', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f97316' }}><FaDatabase size={12} /></div>
+                                        <div style={{ width: '24px', height: '24px', background: '#d4edda', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7BC043' }}><FaDatabase size={12} /></div>
                                         Add Resource
                                     </Link>
                                 </motion.div>
@@ -276,14 +276,14 @@ const AdminLayout = () => {
                                                         display: 'block',
                                                         padding: '12px 15px',
                                                         borderBottom: '1px solid var(--border-color)',
-                                                        background: (!msg.status || msg.status === 'new' || msg.status === 'unread') ? 'rgba(248, 180, 0, 0.05)' : 'transparent',
-                                                        borderLeft: `3px solid ${(!msg.status || msg.status === 'new' || msg.status === 'unread') ? 'var(--primary-yellow)' : 'transparent'}`,
+                                                        background: (!msg.status || msg.status === 'new' || msg.status === 'unread') ? 'rgba(123, 192, 67, 0.05)' : 'transparent',
+                                                        borderLeft: `3px solid ${(!msg.status || msg.status === 'new' || msg.status === 'unread') ? 'var(--primary)' : 'transparent'}`,
                                                         textDecoration: 'none',
                                                         color: 'inherit',
                                                         transition: 'all 0.2s'
                                                     }}
                                                     onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-body)'}
-                                                    onMouseLeave={(e) => e.currentTarget.style.background = (!msg.status || msg.status === 'new' || msg.status === 'unread') ? 'rgba(248, 180, 0, 0.05)' : 'transparent'}
+                                                    onMouseLeave={(e) => e.currentTarget.style.background = (!msg.status || msg.status === 'new' || msg.status === 'unread') ? 'rgba(123, 192, 67, 0.05)' : 'transparent'}
                                                 >
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                                                         <span style={{ fontWeight: (!msg.status || msg.status === 'new' || msg.status === 'unread') ? 800 : 600, fontSize: '0.9rem' }}>{msg.name}</span>
@@ -292,7 +292,7 @@ const AdminLayout = () => {
                                                                 fontSize: '0.65rem',
                                                                 padding: '0.15rem 0.4rem',
                                                                 borderRadius: '8px',
-                                                                background: 'var(--primary-yellow)',
+                                                                background: 'var(--primary)',
                                                                 color: 'white',
                                                                 fontWeight: 700
                                                             }}>NEW</span>
