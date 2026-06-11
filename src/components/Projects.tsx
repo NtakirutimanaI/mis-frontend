@@ -46,11 +46,18 @@ const Projects: React.FC<ProjectsProps> = ({ profile }) => {
                                 <p className="project-desc-text">
                                     {project.description || "I'm a paragraph. Click here to add your own text and edit me. It's easy. Just click \"Edit Text\" or double click me to add your own content and make changes to the font."}
                                 </p>
-                                {project.url && (
-                                    <a href={project.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'underline', fontWeight: 700 }}>
-                                        View Project
-                                    </a>
-                                )}
+                                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                                    {project.url && (
+                                        <a href={project.url} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ fontSize: '0.85rem', padding: '0.4rem 1rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                            View Project
+                                        </a>
+                                    )}
+                                    {project.githubUrl && (
+                                        <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.85rem', padding: '0.4rem 1rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-main)', fontWeight: 600 }}>
+                                            GitHub
+                                        </a>
+                                    )}
+                                </div>
                             </div>
                             <div className="project-image-container">
                                 {project.imageUrl ? (
