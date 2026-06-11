@@ -31,9 +31,6 @@ const Experience: React.FC<ExperienceProps> = ({ profile }) => {
             <div className="container">
                 <div style={{ marginBottom: '4rem' }}>
                     <h1 style={{ fontSize: '3rem', fontWeight: 800 }}>About MIS</h1>
-                    <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
-                        {profile.yearsOfExperience} years of experience as {profile.title}
-                    </p>
                 </div>
 
                 {/* About Us */}
