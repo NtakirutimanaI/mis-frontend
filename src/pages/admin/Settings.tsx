@@ -26,7 +26,7 @@ const Settings = () => {
 
     // Settings state
     const [settings, setSettings] = useState({
-        siteTitle: 'Who Am I? Portfolio',
+        siteTitle: 'MIS - Make It Solutions',
         enableAnimations: true,
         enableNotifications: true,
         isPublic: true,

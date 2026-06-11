@@ -86,7 +86,7 @@ const Login = () => {
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="form-input"
                                     style={{ paddingLeft: '3rem', width: '100%' }}
-                                    placeholder="owneronly@gmail.com"
+                                    placeholder="info@makeitsolutions.rw"
                                     required
                                 />
                             </div>

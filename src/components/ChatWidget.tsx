@@ -110,7 +110,7 @@ const ChatWidget = () => {
         setSessionId(newId);
         setMessages([{
             id: 'init',
-            content: "Hi there! I'm Innocent's virtual assistant. I can check projects, skills, or general info for you. How can I help?",
+            content: "Hi there! I'm MIS virtual assistant. I can check projects, skills, or general info for you. How can I help?",
             sender: 'bot',
             createdAt: new Date().toISOString(),
             isRead: true
@@ -151,7 +151,7 @@ const ChatWidget = () => {
                 // If ID exists but no msgs on backend, reset
                 setMessages([{
                     id: 'init',
-                    content: "Hi there! I'm Innocent's virtual assistant. How can I help you today?",
+                    content: "Hi there! I'm MIS virtual assistant. How can I help you today?",
                     sender: 'bot',
                     createdAt: new Date().toISOString(),
                     isRead: true

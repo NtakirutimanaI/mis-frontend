@@ -154,7 +154,7 @@ const AdminLayout = () => {
                     {/* Brand Logo */}
                     <Link to="/" className="admin-brand">
                         <span style={{ width: '12px', height: '12px', background: 'var(--primary-yellow)', borderRadius: '50%', display: 'inline-block' }}></span>
-                        Innocent Panel
+                        MIS Panel
                     </Link>
 
                     {/* Search Bar */}

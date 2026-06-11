@@ -17,8 +17,8 @@ const Navbar: React.FC<NavbarProps> = ({ profile }) => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const fullName = profile ? `${profile.firstName} ${profile.lastName}` : 'Nicol Rider';
-    const role = profile?.title || 'Editor';
+    const fullName = profile ? `${profile.firstName} ${profile.lastName}` : 'MAKE IT SOLUTIONS (MIS)';
+    const role = profile?.title || 'ICT Company';
 
     return (
         <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
