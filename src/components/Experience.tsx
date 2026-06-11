@@ -1,4 +1,7 @@
+import { FaLaptopCode, FaMobileAlt, FaCloud, FaDatabase, FaCogs, FaShieldAlt, FaChartLine, FaRobot, FaProjectDiagram } from 'react-icons/fa';
 import type { Profile } from '../services/profileService';
+
+const SERVICE_ICONS = [FaLaptopCode, FaMobileAlt, FaCloud, FaDatabase, FaCogs, FaShieldAlt, FaChartLine, FaRobot, FaProjectDiagram];
 
 interface ExperienceProps {
     profile: Profile;
@@ -68,22 +71,90 @@ const Experience: React.FC<ExperienceProps> = ({ profile }) => {
 
                 <div style={{ height: '4rem' }}></div>
 
-                {/* Working Hours */}
+                {/* Our Services */}
                 {profile.education && profile.education.length > 0 && (
                     <div className="resume-section" style={{ borderTop: '1px solid #e0e0e0', paddingTop: '4rem' }}>
-                        <div className="resume-title">Working Hours</div>
+                        <div className="resume-title">Our<br />Services</div>
                         <div className="resume-list">
-                            {profile.education.map((edu, idx) => (
-                                <div key={idx} className="resume-item">
-                                    <div className="resume-date">
-                                        {edu.graduationYear}
-                                    </div>
-                                    <div className="resume-content">
-                                        <h3>{edu.institution}</h3>
-                                        <p className="resume-desc">{edu.degree}</p>
-                                    </div>
-                                </div>
-                            ))}
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                                gap: '1.5rem'
+                            }}>
+                                {profile.education.map((edu, idx) => {
+                                    const IconComponent = SERVICE_ICONS[idx % SERVICE_ICONS.length];
+                                    return (
+                                        <div
+                                            key={idx}
+                                            style={{
+                                                background: 'var(--bg-white)',
+                                                border: '1px solid var(--border-color)',
+                                                borderRadius: '16px',
+                                                padding: '2rem 1.5rem',
+                                                transition: 'all 0.3s ease',
+                                                cursor: 'default',
+                                                position: 'relative',
+                                                overflow: 'hidden',
+                                            }}
+                                            onMouseEnter={e => {
+                                                e.currentTarget.style.transform = 'translateY(-6px)';
+                                                e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.12)';
+                                                e.currentTarget.style.borderColor = 'var(--primary)';
+                                            }}
+                                            onMouseLeave={e => {
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = 'none';
+                                                e.currentTarget.style.borderColor = 'var(--border-color)';
+                                            }}
+                                        >
+                                            <div style={{
+                                                width: '56px',
+                                                height: '56px',
+                                                borderRadius: '14px',
+                                                background: 'linear-gradient(135deg, var(--primary) 0%, #5fa832 100%)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                color: '#fff',
+                                                fontSize: '1.5rem',
+                                                marginBottom: '1.25rem'
+                                            }}>
+                                                <IconComponent />
+                                            </div>
+                                            <h3 style={{
+                                                fontSize: '1.15rem',
+                                                fontWeight: 700,
+                                                marginBottom: '0.5rem',
+                                                color: 'var(--text-main)'
+                                            }}>
+                                                {edu.degree}
+                                            </h3>
+                                            {edu.institution && (
+                                                <p style={{
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: 600,
+                                                    color: 'var(--primary)',
+                                                    marginBottom: '0.75rem',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.5px'
+                                                }}>
+                                                    {edu.institution}
+                                                </p>
+                                            )}
+                                            {edu.description && (
+                                                <p style={{
+                                                    fontSize: '0.9rem',
+                                                    color: 'var(--text-muted)',
+                                                    lineHeight: '1.6',
+                                                    margin: 0
+                                                }}>
+                                                    {edu.description}
+                                                </p>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
                 )}
