@@ -54,8 +54,9 @@ const Resources = () => {
     const saveProfile = async (updates: Partial<Profile>) => {
         setSaving(true);
         try {
-            const r = await profileService.updateProfile(updates);
-            setProfile(r);
+            await profileService.updateProfile(updates);
+            const fresh = await profileService.getMyProfile();
+            setProfile(fresh);
             showToast('Saved successfully!', 'success');
         } catch (e: any) { showToast(e?.response?.data?.message || 'Failed to save', 'error'); }
         finally { setSaving(false); }
@@ -73,7 +74,7 @@ const Resources = () => {
                 ]}
                 checkbox={{ key: 'current', label: 'I currently work here' }}
                 defaultItem={{ title: '', company: '', location: '', startDate: '', endDate: '', current: false, technologies: [] }}
-                onSave={async (items) => { await saveProfile({ ...profile, experience: items }); }} saving={saving} searchQuery={searchQuery} searchFields={['title', 'company', 'location']}
+                onSave={async (items) => { await saveProfile({ experience: items }); }} saving={saving} searchQuery={searchQuery} searchFields={['title', 'company', 'location']}
             />;
             case 'education': return <ArrayEditor title="Education" items={profile.education} color={SECTION_COLORS.education} icon={SECTION_ICONS.education}
                 fields={[
@@ -81,10 +82,10 @@ const Resources = () => {
                     { key: 'graduationYear', label: 'Graduation Year', type: 'number' },
                 ]}
                 defaultItem={{ degree: '', institution: '', location: '', graduationYear: new Date().getFullYear(), description: '' }}
-                onSave={async (items) => { await saveProfile({ ...profile, education: items }); }} saving={saving} searchQuery={searchQuery} searchFields={['degree', 'institution', 'location']}
+                onSave={async (items) => { await saveProfile({ education: items }); }} saving={saving} searchQuery={searchQuery} searchFields={['degree', 'institution', 'location']}
             />;
-            case 'skills': return <SkillsEditor skills={profile.skills} onSave={async (s) => { await saveProfile({ ...profile, skills: s as Profile['skills'] }); }} saving={saving} />;
-            case 'projects': return <ProjectsEditor projects={profile.projects} onSave={async (items) => { await saveProfile({ ...profile, projects: items }); }} saving={saving} searchQuery={searchQuery} />;
+            case 'skills': return <SkillsEditor skills={profile.skills} onSave={async (s) => { await saveProfile({ skills: s as Profile['skills'] }); }} saving={saving} />;
+            case 'projects': return <ProjectsEditor projects={profile.projects} onSave={async (items) => { await saveProfile({ projects: items }); }} saving={saving} searchQuery={searchQuery} />;
             case 'certifications': return <ArrayEditor title="Certifications" items={profile.certifications} color={SECTION_COLORS.certifications} icon={SECTION_ICONS.certifications}
                 fields={[
                     { key: 'name', label: 'Name' }, { key: 'issuer', label: 'Issuer' }, { key: 'date', label: 'Date', type: 'date' }, { key: 'credentialUrl', label: 'Credential URL' }, { key: 'imageUrl', label: 'Image', type: 'image' },
