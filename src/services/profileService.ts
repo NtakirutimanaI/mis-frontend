@@ -47,6 +47,7 @@ export interface Profile {
         graduationYear: number;
         description?: string;
     }>;
+    about: string;
     experience: Array<{
         title: string;
         company: string;

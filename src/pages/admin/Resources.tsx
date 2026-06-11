@@ -11,26 +11,26 @@ import type { Profile } from '../../services/profileService';
 import Loading from '../../components/Loading';
 import { useToast } from '../../context/ToastContext';
 
-type SectionId = 'intro' | 'experience' | 'education' | 'skills' | 'projects' | 'certifications' | 'languages' | 'settings';
+type SectionId = 'intro' | 'about' | 'education' | 'skills' | 'projects' | 'certifications' | 'languages' | 'settings';
 
 const SECTION_COLORS: Record<string, string> = {
-    intro: 'var(--primary)', experience: 'var(--primary-teal)', education: 'var(--primary)',
+    intro: 'var(--primary)', about: 'var(--primary-teal)', education: 'var(--primary)',
     skills: 'var(--primary-red)', projects: 'var(--primary-teal)', certifications: '#764ba2',
     languages: '#f093fb', settings: 'var(--primary)',
 };
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
-    intro: <FaUser />, experience: <FaBriefcase />, education: <FaGraduationCap />,
+    intro: <FaUser />, about: <FaBriefcase />, education: <FaGraduationCap />,
     skills: <FaCode />, projects: <FaProjectDiagram />, certifications: <FaCertificate />,
     languages: <FaLanguage />, settings: <FaCog />,
 };
 
-const SECTIONS: SectionId[] = ['intro', 'experience', 'education', 'skills', 'projects', 'certifications', 'languages', 'settings'];
+const SECTIONS: SectionId[] = ['intro', 'about', 'education', 'skills', 'projects', 'certifications', 'languages', 'settings'];
 
 const emptyP: Profile = {
     id: '', firstName: '', lastName: '', username: '', email: '', bio: '', greeting: '', aboutMeTitle: '', title: '',
     location: '', phone: '', website: '', avatar: '', cvUrl: '', yearsOfExperience: 0,
-    availableForHire: false, isPublic: false, education: [], experience: [],
+    availableForHire: false, isPublic: false, about: '', education: [], experience: [],
     skills: { backend: [], frontend: [], databases: [], tools: [] }, projects: [], certifications: [], languages: [], socialLinks: {}, services: [],
     createdAt: '', updatedAt: '', role: '', type: '',
 };
@@ -67,15 +67,7 @@ const Resources = () => {
     const renderSection = () => {
         switch (filter) {
             case 'intro': return <IntroEditor profile={profile} onSave={saveProfile} saving={saving} />;
-            case 'experience': return <ArrayEditor title="Experience" items={profile.experience} color={SECTION_COLORS.experience} icon={SECTION_ICONS.experience}
-                fields={[
-                    { key: 'title', label: 'Title' }, { key: 'company', label: 'Company' }, { key: 'location', label: 'Location' },
-                    { key: 'startDate', label: 'Start Date', type: 'date' }, { key: 'endDate', label: 'End Date', type: 'date' },
-                ]}
-                checkbox={{ key: 'current', label: 'I currently work here' }}
-                defaultItem={{ title: '', company: '', location: '', startDate: '', endDate: '', current: false, technologies: [] }}
-                onSave={async (items) => { await saveProfile({ experience: items }); }} saving={saving} searchQuery={searchQuery} searchFields={['title', 'company', 'location']}
-            />;
+            case 'about': return <AboutEditor about={profile.about} onSave={saveProfile} saving={saving} />;
             case 'education': return <ArrayEditor title="Education" items={profile.education} color={SECTION_COLORS.education} icon={SECTION_ICONS.education}
                 fields={[
                     { key: 'degree', label: 'Degree' }, { key: 'institution', label: 'Institution' }, { key: 'location', label: 'Location' },
@@ -224,6 +216,41 @@ const IntroEditor = ({ profile, onSave, saving }: { profile: Profile; onSave: (u
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <button onClick={handleSave} disabled={saving || savingLocal} className="btn-primary">
                     {saving || savingLocal ? 'Saving...' : <><FaSave /> Save Intro</>}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+/* ───── About Editor ───── */
+const AboutEditor = ({ about, onSave, saving }: { about: string; onSave: (u: Partial<Profile>) => Promise<void>; saving: boolean }) => {
+    const [text, setText] = useState(about || '');
+    const [localSaving, setLocalSaving] = useState(false);
+
+    useEffect(() => { setText(about || ''); }, [about]);
+
+    const handleSave = async () => {
+        setLocalSaving(true);
+        await onSave({ about: text });
+        setLocalSaving(false);
+    };
+
+    const isSaving = saving || localSaving;
+
+    return (
+        <div className="content-card" style={{ padding: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>About Us</h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Write a single paragraph about the company. This will be displayed on the public page.</p>
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label">About Paragraph</label>
+                <textarea value={text} onChange={e => setText(e.target.value)} className="form-textarea" rows={8}
+                    placeholder="Tell visitors about your company, mission, and what makes you unique..."
+                    style={{ resize: 'vertical' }}
+                />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button onClick={handleSave} disabled={isSaving} className="btn-primary">
+                    {isSaving ? 'Saving...' : <><FaSave /> Save About</>}
                 </button>
             </div>
         </div>

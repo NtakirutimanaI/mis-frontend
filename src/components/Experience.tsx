@@ -26,11 +26,6 @@ interface ExperienceProps {
 const Experience: React.FC<ExperienceProps> = ({ profile }) => {
     const [selectedService, setSelectedService] = useState<any>(null);
 
-    const formatDate = (date: string) => {
-        const d = new Date(date);
-        return `${d.getFullYear()}`;
-    };
-
     return (
         <section className="section" id="resume">
             <div className="container">
@@ -41,23 +36,15 @@ const Experience: React.FC<ExperienceProps> = ({ profile }) => {
                     </p>
                 </div>
 
-                {/* How We Work */}
+                {/* About Us */}
                 <div className="resume-section">
-                    <div className="resume-title">How<br />We Work</div>
+                    <div className="resume-title">About<br />Us</div>
                     <div className="resume-list">
-                        {profile.experience.map((exp, idx) => (
-                            <div key={idx} className="resume-item">
-                                <div className="resume-date">
-                                    {formatDate(exp.startDate)} - {exp.current ? 'Present' : formatDate(exp.endDate || '')}
-                                </div>
-                                <div className="resume-content">
-                                    <h3>{exp.title}</h3>
-                                    <p className="resume-desc">
-                                        {exp.description || "I'm a paragraph. Click here to add your own text and edit me. It's easy. Just click 'Edit Text' or double click me to add your own content and make changes to the font."}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
+                        <div className="resume-item" style={{ borderLeft: '3px solid var(--primary)', paddingLeft: '1.5rem' }}>
+                            <p style={{ fontSize: '1.05rem', lineHeight: '1.8', color: 'var(--text-main)', margin: 0 }}>
+                                {profile.about || profile.bio || "MAKE IT SOLUTIONS (MIS) is a leading ICT company in Rwanda specializing in web development, mobile applications, and digital transformation."}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
