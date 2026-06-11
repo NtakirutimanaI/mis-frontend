@@ -234,7 +234,6 @@ const Experience: React.FC<ExperienceProps> = ({ profile }) => {
                                 onClick={e => e.stopPropagation()}
                                 style={{
                                     background: 'var(--bg-white)',
-                                    borderRadius: '20px',
                                     maxWidth: '700px',
                                     width: '100%',
                                     maxHeight: '90vh',
