@@ -10,7 +10,7 @@ const Projects: React.FC<ProjectsProps> = ({ profile }) => {
     return (
         <section className="section" id="projects">
             <div className="container">
-                <div style={{ marginBottom: '4rem' }}>
+                <div style={{ marginBottom: '2rem' }}>
                     <h1 style={{ fontSize: '3rem', fontWeight: 800 }}>Projects</h1>
                 </div>
 

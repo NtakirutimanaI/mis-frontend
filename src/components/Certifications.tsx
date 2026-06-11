@@ -38,7 +38,7 @@ const Certifications: React.FC<CertificationsProps> = ({ profile }) => {
     return (
         <section className="section" id="certifications" style={{ background: 'var(--section-alt)' }}>
             <div className="container">
-                <div style={{ marginBottom: '3rem' }}>
+                <div style={{ marginBottom: '1.5rem' }}>
                     <h1 style={{ fontSize: '3rem', fontWeight: 800 }}>Certifications</h1>
                 </div>
 

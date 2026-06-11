@@ -29,7 +29,7 @@ const Experience: React.FC<ExperienceProps> = ({ profile }) => {
     return (
         <section className="section" id="resume">
             <div className="container">
-                <div style={{ marginBottom: '4rem' }}>
+                <div style={{ marginBottom: '2rem' }}>
                     <h1 style={{ fontSize: '3rem', fontWeight: 800 }}>About MIS</h1>
                 </div>
 
@@ -71,7 +71,7 @@ const Experience: React.FC<ExperienceProps> = ({ profile }) => {
                     </div>
                 </div>
 
-                <div style={{ height: '4rem' }}></div>
+                <div style={{ height: '2rem' }}></div>
 
                 {/* Our Services */}
                 {profile.education && profile.education.length > 0 && (
