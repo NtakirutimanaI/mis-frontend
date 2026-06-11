@@ -34,7 +34,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
                         >
-                            {profile.greeting || 'Hello'}
+                            👋 {profile.greeting || 'Hello'}
                         </motion.h1>
 
                         <motion.h3
