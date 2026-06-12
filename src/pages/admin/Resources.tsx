@@ -57,6 +57,7 @@ const Resources = () => {
             await profileService.updateProfile(updates);
             const fresh = await profileService.getMyProfile();
             setProfile(fresh);
+            window.dispatchEvent(new CustomEvent('profile-updated'));
             showToast('Saved successfully!', 'success');
         } catch (e: any) { showToast(e?.response?.data?.message || 'Failed to save', 'error'); }
         finally { setSaving(false); }

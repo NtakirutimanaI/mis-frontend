@@ -4,6 +4,7 @@ import Projects from '../../components/Projects';
 import Certifications from '../../components/Certifications';
 import Contact from '../../components/Contact';
 import { useOutletContext } from 'react-router-dom';
+import TeamMembers from '../../components/TeamMembers';
 import type { Profile } from '../../services/profileService';
 
 const Home = () => {
@@ -28,6 +29,7 @@ const Home = () => {
             <Projects profile={profile} />
             <Certifications profile={profile} />
             <Contact profile={profile} />
+            <TeamMembers />
         </>
     );
 };

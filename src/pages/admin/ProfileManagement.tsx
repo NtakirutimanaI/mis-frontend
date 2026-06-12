@@ -34,7 +34,7 @@ const ProfileManagement = () => {
 
     return (
         <div>
-            <GeneralTab profile={profile} onUpdate={handleProfileUpdate} />
+            <GeneralTab profile={profile} onUpdate={(updatedProfile) => { handleProfileUpdate(updatedProfile); window.dispatchEvent(new CustomEvent('profile-updated')); }} />
         </div>
     );
 };

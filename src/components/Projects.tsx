@@ -15,7 +15,15 @@ const Projects: React.FC<ProjectsProps> = ({ profile }) => {
                 </div>
 
                 <div>
-                    {displayProjects.map((project, index) => (
+                    {displayProjects.map((project, index) => {
+                        const projectUrl = project.url && !project.url.startsWith('http://') && !project.url.startsWith('https://')
+                            ? `https://${project.url}`
+                            : project.url;
+                        const githubUrl = project.githubUrl && !project.githubUrl.startsWith('http://') && !project.githubUrl.startsWith('https://')
+                            ? `https://${project.githubUrl}`
+                            : project.githubUrl;
+
+                        return (
                         <div key={index} className="project-item">
                             <div className="project-text">
                                 <h3 className="project-name">{project.name}</h3>
@@ -47,13 +55,13 @@ const Projects: React.FC<ProjectsProps> = ({ profile }) => {
                                     {project.description || "I'm a paragraph. Click here to add your own text and edit me. It's easy. Just click \"Edit Text\" or double click me to add your own content and make changes to the font."}
                                 </p>
                                 <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                                    {project.url && (
-                                        <a href={project.url} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ fontSize: '0.85rem', padding: '0.4rem 1rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                    {projectUrl && (
+                                        <a href={projectUrl} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ fontSize: '0.85rem', padding: '0.4rem 1rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                                             View Project
                                         </a>
                                     )}
-                                    {project.githubUrl && (
-                                        <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.85rem', padding: '0.4rem 1rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-main)', fontWeight: 600 }}>
+                                    {githubUrl && (
+                                        <a href={githubUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.85rem', padding: '0.4rem 1rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-main)', fontWeight: 600 }}>
                                             GitHub
                                         </a>
                                     )}
@@ -69,7 +77,8 @@ const Projects: React.FC<ProjectsProps> = ({ profile }) => {
                                 )}
                             </div>
                         </div>
-                    ))}
+                    );
+                    })}
                 </div>
             </div>
         </section>

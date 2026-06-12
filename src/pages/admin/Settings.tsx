@@ -112,7 +112,8 @@ const Settings = () => {
 
             if (Object.keys(updateData).length > 0) {
                 const updatedProfile = await profileService.updateProfile(updateData);
-                setProfile(updatedProfile); // Update local profile state to keep in sync
+                setProfile(updatedProfile);
+                window.dispatchEvent(new CustomEvent('profile-updated'));
                 showToast('Setting updated successfully', 'success');
             }
         } catch (error) {

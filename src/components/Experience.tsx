@@ -34,10 +34,10 @@ const Experience: React.FC<ExperienceProps> = ({ profile }) => {
                 </div>
 
                 {/* About Us */}
-                <div className="resume-section">
+                <div className="resume-section" style={{ gap: '2rem', marginBottom: '1.5rem' }}>
                     <div className="resume-title">About<br />Us</div>
-                    <div className="resume-list">
-                        <div className="resume-item" style={{ borderLeft: '3px solid var(--primary)', paddingLeft: '1.5rem' }}>
+                    <div className="resume-list" style={{ gap: 0 }}>
+                        <div className="resume-item" style={{ gridTemplateColumns: '1fr', borderLeft: '3px solid var(--primary)', paddingLeft: '1.5rem' }}>
                             <p style={{ fontSize: '1.05rem', lineHeight: '1.8', color: 'var(--text-main)', margin: 0 }}>
                                 {profile.about || profile.bio || "MAKE IT SOLUTIONS (MIS) is a leading ICT company in Rwanda specializing in web development, mobile applications, and digital transformation."}
                             </p>
