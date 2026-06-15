@@ -1226,17 +1226,17 @@ img {
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-}
-
-.hero-slider-viewport:hover .hero-slide {
-  transform: scale(1.03);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
 }
 
 .hero-slide-content {
   text-align: center;
   color: #fff;
+  transition: transform 0.3s ease;
+}
+
+.hero-slide:hover .hero-slide-content {
+  transform: translateY(-8px);
 }
 
 .hero-slide-title {
