@@ -1238,26 +1238,46 @@ img {
   background: transparent;
 }
 
-/* SVG Figure image */
-.hero-slide-figure-wrap {
+/* Handwriting animation */
+.handwriting-wrap {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1.2rem;
-  width: 180px;
-  height: 130px;
+  padding: 0.5rem;
 }
 
-.hero-slide-figure {
+.handwriting-svg {
   width: 100%;
   height: 100%;
-  animation: floatFigure 5s ease-in-out infinite;
-  filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.08));
+  max-width: 380px;
+  max-height: 150px;
 }
 
-@keyframes floatFigure {
+.hw-text {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  dominant-baseline: middle;
+}
+
+.hw-text-stroke {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  dominant-baseline: middle;
+}
+
+.hand-pen {
+  animation: penBob 0.6s ease-in-out infinite;
+}
+
+@keyframes penBob {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  50% { transform: translateY(-3px); }
 }
 
 /* Play button overlay */
