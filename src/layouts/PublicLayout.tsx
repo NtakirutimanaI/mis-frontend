@@ -12,7 +12,7 @@ interface PublicLayoutProps {
 const PublicLayout: React.FC<PublicLayoutProps> = ({ profile }) => {
     return (
         <div className="flex flex-col min-h-screen">
-            <Navbar profile={profile} />
+            <Navbar />
             <main className="flex-grow">
                 <Outlet context={{ profile }} />
             </main>

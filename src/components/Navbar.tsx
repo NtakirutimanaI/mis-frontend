@@ -1,12 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import type { Profile } from '../services/profileService';
 
-interface NavbarProps {
-    profile?: Profile | null;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ profile }) => {
+const Navbar: React.FC = () => {
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
