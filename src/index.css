@@ -1176,7 +1176,7 @@ img {
   align-items: center;
   gap: 1.5rem;
   margin-left: -300px;
-  margin-top: 0;
+  margin-top: -60px;
   position: relative;
   z-index: 2;
 }
@@ -1226,6 +1226,12 @@ img {
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.hero-slider-viewport:hover .hero-slide {
+  transform: scale(1.03);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
 }
 
 .hero-slide-content {
@@ -1251,8 +1257,9 @@ img {
 .hero-slider-nav {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 0.75rem;
+  margin-left: 500px;
 }
 
 .hero-slider-arrow {

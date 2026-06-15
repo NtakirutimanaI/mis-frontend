@@ -42,7 +42,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
     }, []);
 
     useEffect(() => {
-        const timer = setInterval(next, 5000);
+        const timer = setInterval(next, 8000);
         return () => clearInterval(timer);
     }, [next]);
 
@@ -77,7 +77,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                                     initial={{ opacity: 0, x: 60 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -60 }}
-                                    transition={{ duration: 0.4 }}
+                                    transition={{ duration: 0.8 }}
                                 >
                                     <div className="hero-slide-content">
                                         <h3 className="hero-slide-title">{slides[current].title}</h3>
