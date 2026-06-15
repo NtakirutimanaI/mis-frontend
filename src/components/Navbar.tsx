@@ -41,7 +41,7 @@ const Navbar: React.FC = () => {
                             width: '12px', height: '12px', background: 'var(--primary)',
                             borderRadius: '50%', display: 'inline-block', flexShrink: 0,
                         }} />
-                        <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-main)' }}>
+                        <span style={{ fontWeight: 800, fontSize: '1.3rem', color: 'var(--text-main)' }}>
                             MAKE IT SOLUTIONS (MIS)
                         </span>
                     </div>
