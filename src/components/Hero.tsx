@@ -11,22 +11,22 @@ const slides = [
     {
         title: 'Our ICT Services',
         description: 'Enterprise-grade IT solutions tailored to your business needs.',
-        gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: '#7BC043',
     },
     {
         title: 'Dashboards',
         description: 'Real-time analytics and monitoring dashboards for data-driven decisions.',
-        gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        color: '#ff5252',
     },
     {
         title: 'Our Innovations',
         description: 'Cutting-edge technology innovations driving digital transformation.',
-        gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        color: '#4ecdc4',
     },
     {
         title: 'Digital Solutions',
         description: 'End-to-end digital solutions from concept to deployment.',
-        gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        color: '#2d2d2d',
     },
 ];
 
@@ -73,7 +73,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                                 <motion.div
                                     key={current}
                                     className="hero-slide"
-                                    style={{ background: slides[current].gradient }}
+                                    style={{ background: slides[current].color }}
                                     initial={{ opacity: 0, x: 60 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -60 }}
