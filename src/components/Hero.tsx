@@ -10,7 +10,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
         <section className="hero section" id="home">
             <div className="container">
                 <div className="hero-grid">
-                    {/* Left: Circular Avatar */}
+                    {/* Left: Company Name + Avatar */}
                     <motion.div
                         className="hero-avatar-container"
                         initial={{ opacity: 0, scale: 0.9 }}

@@ -90,6 +90,11 @@ export interface Profile {
         language: string;
         proficiency: string;
     }>;
+    teamMembers: Array<{
+        name: string;
+        role: string;
+        imageUrl?: string;
+    }>;
     socialLinks: {
         github?: string;
         linkedin?: string;

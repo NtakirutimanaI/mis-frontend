@@ -3,35 +3,36 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useOutletContext } from 'react-router-dom';
 import {
     FaUser, FaBriefcase, FaGraduationCap, FaCode, FaProjectDiagram,
-    FaCertificate, FaLanguage, FaCog, FaPlus, FaEdit, FaTrash,
-    FaTimes, FaCamera, FaSave
+    FaCertificate, FaLanguage, FaCog,     FaPlus, FaEdit, FaTrash,
+    FaTimes, FaCamera, FaSave, FaUsers
 } from 'react-icons/fa';
 import { profileService } from '../../services/profileService';
 import type { Profile } from '../../services/profileService';
 import Loading from '../../components/Loading';
 import { useToast } from '../../context/ToastContext';
+import TeamTab from './profile-sections/TeamTab';
 
-type SectionId = 'intro' | 'about' | 'education' | 'skills' | 'projects' | 'certifications' | 'languages' | 'settings';
+type SectionId = 'intro' | 'about' | 'education' | 'skills' | 'projects' | 'certifications' | 'languages' | 'team' | 'settings';
 
 const SECTION_COLORS: Record<string, string> = {
     intro: 'var(--primary)', about: 'var(--primary-teal)', education: 'var(--primary)',
     skills: 'var(--primary-red)', projects: 'var(--primary-teal)', certifications: '#764ba2',
-    languages: '#f093fb', settings: 'var(--primary)',
+    languages: '#f093fb', team: '#ff6b6b', settings: 'var(--primary)',
 };
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
     intro: <FaUser />, about: <FaBriefcase />, education: <FaGraduationCap />,
     skills: <FaCode />, projects: <FaProjectDiagram />, certifications: <FaCertificate />,
-    languages: <FaLanguage />, settings: <FaCog />,
+    languages: <FaLanguage />, team: <FaUsers />, settings: <FaCog />,
 };
 
-const SECTIONS: SectionId[] = ['intro', 'about', 'education', 'skills', 'projects', 'certifications', 'languages', 'settings'];
+const SECTIONS: SectionId[] = ['intro', 'about', 'education', 'skills', 'projects', 'certifications', 'languages', 'team', 'settings'];
 
 const emptyP: Profile = {
     id: '', firstName: '', lastName: '', username: '', email: '', bio: '', greeting: '', aboutMeTitle: '', title: '',
     location: '', phone: '', website: '', avatar: '', cvUrl: '', yearsOfExperience: 0,
     availableForHire: false, isPublic: false, about: '', education: [], experience: [],
-    skills: { backend: [], frontend: [], databases: [], tools: [] }, projects: [], certifications: [], languages: [], socialLinks: {}, services: [],
+    skills: { backend: [], frontend: [], databases: [], tools: [] }, projects: [], certifications: [], languages: [], teamMembers: [], socialLinks: {}, services: [],
     createdAt: '', updatedAt: '', role: '', type: '',
 };
 
@@ -93,6 +94,7 @@ const Resources = () => {
                 defaultItem={{ language: '', proficiency: '' }}
                 onSave={async (items) => { await saveProfile({ ...profile, languages: items }); }} saving={saving} searchQuery={searchQuery} searchFields={['language', 'proficiency']}
             />;
+            case 'team': return <TeamTab profile={profile} onUpdate={(p) => { setProfile(p); window.dispatchEvent(new CustomEvent('profile-updated')); }} />;
             case 'settings': return <SettingsEditor profile={profile} onSave={saveProfile} saving={saving} />;
         }
     };

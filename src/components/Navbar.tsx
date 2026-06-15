@@ -17,20 +17,10 @@ const Navbar: React.FC<NavbarProps> = ({ profile }) => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const fullName = profile ? `${profile.firstName} ${profile.lastName}` : 'MAKE IT SOLUTIONS (MIS)';
-    const role = profile?.title || 'ICT Company';
-
     return (
         <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
             <div className="container">
                 <div className="navbar-content">
-                    {/* Left: Name and Role */}
-                    <Link to="/" className="navbar-brand">
-                        <span className="brand-dot"></span>
-                        <span className="brand-name">{fullName}</span>
-                        <span className="brand-role">{role}</span>
-                    </Link>
-
                     {/* Right: Navigation Links */}
                     <div className="navbar-links">
                         <a href="/#resume" className="nav-link">Company</a>
