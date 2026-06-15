@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaChevronLeft, FaChevronRight, FaPlay, FaServer, FaChartBar, FaLightbulb, FaLaptopCode } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaPlay, FaServer, FaChartBar, FaLightbulb, FaLaptopCode, FaChartLine, FaCloud, FaCode, FaRocket, FaNetworkWired, FaChartPie, FaTerminal, FaCogs } from 'react-icons/fa';
 import type { Profile } from '../services/profileService';
 
 interface HeroProps {
@@ -11,26 +11,22 @@ const slides = [
     {
         title: 'Our ICT Services',
         description: 'Enterprise-grade IT solutions tailored to your business needs.',
-        color: '#7BC043',
-        icon: <FaServer />,
+        icons: [<FaServer />, <FaCloud />, <FaNetworkWired />],
     },
     {
         title: 'Dashboards',
         description: 'Real-time analytics and monitoring dashboards for data-driven decisions.',
-        color: '#ff5252',
-        icon: <FaChartBar />,
+        icons: [<FaChartBar />, <FaChartLine />, <FaChartPie />],
     },
     {
         title: 'Our Innovations',
         description: 'Cutting-edge technology innovations driving digital transformation.',
-        color: '#4ecdc4',
-        icon: <FaLightbulb />,
+        icons: [<FaLightbulb />, <FaRocket />, <FaCogs />],
     },
     {
         title: 'Digital Solutions',
         description: 'End-to-end digital solutions from concept to deployment.',
-        color: '#2d2d2d',
-        icon: <FaLaptopCode />,
+        icons: [<FaLaptopCode />, <FaCode />, <FaTerminal />],
     },
 ];
 
@@ -77,18 +73,16 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                                 <motion.div
                                     key={current}
                                     className="hero-slide"
-                                    style={{ background: slides[current].color }}
                                     initial={{ opacity: 0, x: 60 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -60 }}
                                     transition={{ duration: 0.8 }}
                                 >
-                                    <div className="hero-slide-bg-anim">
-                                        <span className="hero-slide-circle c1" />
-                                        <span className="hero-slide-circle c2" />
-                                        <span className="hero-slide-circle c3" />
+                                    <div className="hero-slide-icons-compose">
+                                        <span className="hero-slide-icon-main">{slides[current].icons[0]}</span>
+                                        <span className="hero-slide-icon-sub i1">{slides[current].icons[1]}</span>
+                                        <span className="hero-slide-icon-sub i2">{slides[current].icons[2]}</span>
                                     </div>
-                                    <div className="hero-slide-icon">{slides[current].icon}</div>
                                     <div className="hero-slide-content">
                                         <h3 className="hero-slide-title">{slides[current].title}</h3>
                                         <p className="hero-slide-desc">{slides[current].description}</p>
