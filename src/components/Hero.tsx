@@ -1,16 +1,56 @@
-import { motion } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import type { Profile } from '../services/profileService';
 
 interface HeroProps {
     profile: Profile;
 }
 
+const slides = [
+    {
+        title: 'Our ICT Services',
+        description: 'Enterprise-grade IT solutions tailored to your business needs.',
+        gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    },
+    {
+        title: 'Dashboards',
+        description: 'Real-time analytics and monitoring dashboards for data-driven decisions.',
+        gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    },
+    {
+        title: 'Our Innovations',
+        description: 'Cutting-edge technology innovations driving digital transformation.',
+        gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    },
+    {
+        title: 'Digital Solutions',
+        description: 'End-to-end digital solutions from concept to deployment.',
+        gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+    },
+];
+
 const Hero: React.FC<HeroProps> = ({ profile }) => {
+    const [current, setCurrent] = useState(0);
+
+    const next = useCallback(() => {
+        setCurrent((prev) => (prev + 1) % slides.length);
+    }, []);
+
+    const prev = useCallback(() => {
+        setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
+    }, []);
+
+    useEffect(() => {
+        const timer = setInterval(next, 5000);
+        return () => clearInterval(timer);
+    }, [next]);
+
     return (
         <section className="hero section" id="home">
             <div className="container">
                 <div className="hero-grid">
-                    {/* Left: Company Name + Avatar */}
+                    {/* Left: Logo */}
                     <motion.div
                         className="hero-avatar-container"
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -26,63 +66,44 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                         )}
                     </motion.div>
 
-                    {/* Right: Text Content */}
-                    <div className="hero-text-content">
-                        <motion.h1
-                            className="hero-title"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                        >
-                            👋 {profile.greeting || 'Hello'}
-                        </motion.h1>
+                    {/* Right: Image Slider */}
+                    <div className="hero-slider">
+                        <div className="hero-slider-viewport">
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={current}
+                                    className="hero-slide"
+                                    style={{ background: slides[current].gradient }}
+                                    initial={{ opacity: 0, x: 60 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -60 }}
+                                    transition={{ duration: 0.4 }}
+                                >
+                                    <div className="hero-slide-content">
+                                        <h3 className="hero-slide-title">{slides[current].title}</h3>
+                                        <p className="hero-slide-desc">{slides[current].description}</p>
+                                    </div>
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
 
-                        <motion.h3
-                            className="hero-subtitle"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                        >
-                            {profile.aboutMeTitle || 'A Bit About Me'}
-                        </motion.h3>
-
-                        <motion.p
-                            className="hero-desc"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4 }}
-                        >
-                            {(() => {
-                                const b = profile.bio;
-                                if (!b) return "I'm a paragraph. Click here to add your own text and edit me. I'm a great place for you to tell a story and let your users know a little more about you.";
-                                const ci = b.indexOf(':');
-                                return ci !== -1 ? <><strong><u>{b.slice(0, ci)}</u></strong>{b.slice(ci)}</> : b;
-                            })()}
-                        </motion.p>
-
-                        <motion.div
-                            className="hero-buttons"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5 }}
-                        >
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                                <a href="#resume" className="circle-btn btn-yellow">
-                                    About MIS
-                                </a>
-                                {profile.cvUrl && (
-                                    <a href={profile.cvUrl} download style={{ fontSize: '0.9rem', color: '#fff', background: 'var(--primary-teal)', fontWeight: 700, padding: '0.3rem 1rem', borderRadius: '20px', textDecoration: 'none', display: 'inline-block' }}>
-                                        Download CV
-                                    </a>
-                                )}
+                        <div className="hero-slider-nav">
+                            <button className="hero-slider-arrow" onClick={prev} aria-label="Previous">
+                                <FaChevronLeft />
+                            </button>
+                            <div className="hero-slider-dots">
+                                {slides.map((_, i) => (
+                                    <span
+                                        key={i}
+                                        className={`hero-slider-dot ${i === current ? 'active' : ''}`}
+                                        onClick={() => setCurrent(i)}
+                                    />
+                                ))}
                             </div>
-                            <a href="#projects" className="circle-btn btn-red">
-                                Projects
-                            </a>
-                            <a href="#contact" className="circle-btn btn-teal">
-                                Contact
-                            </a>
-                        </motion.div>
+                            <button className="hero-slider-arrow" onClick={next} aria-label="Next">
+                                <FaChevronRight />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
