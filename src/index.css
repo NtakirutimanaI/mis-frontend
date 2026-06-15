@@ -1350,8 +1350,16 @@ img {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: opacity 0.3s ease, background 0.2s, color 0.2s;
   font-size: 0.85rem;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hero:hover .hero-slider-arrow,
+.hero-slider:hover .hero-slider-arrow {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .hero-slider-arrow:hover {
