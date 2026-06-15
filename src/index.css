@@ -1371,6 +1371,13 @@ img {
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.hero:hover .hero-slider-dots,
+.hero-slider:hover .hero-slider-dots {
+  opacity: 1;
 }
 
 .hero-slider-dot {
