@@ -7,143 +7,133 @@ interface HeroProps {
     profile: Profile;
 }
 
-interface WritingLine {
+interface WordItem {
     text: string;
+    dir: 'left' | 'right' | 'top' | 'bottom';
     delay: number;
-    duration: number;
-}
-interface SlideData {
-    lines: WritingLine[];
-    color: string;
+    x?: number;
+    y?: number;
 }
 
-const writingLines: SlideData[] = [
+interface SlideData {
+    color: string;
+    words: WordItem[];
+}
+
+const slideData: SlideData[] = [
     {
         color: '#7BC043',
-        lines: [
-            { text: 'ICT SERVICES', delay: 0.3, duration: 1.5 },
-            { text: 'Networking', delay: 2.5, duration: 1.2 },
-            { text: 'Cloud Solutions', delay: 4.5, duration: 1.4 },
-            { text: 'IT Support', delay: 6.5, duration: 1.2 },
+        words: [
+            { text: 'ICT SERVICES', dir: 'left', delay: 0.2, x: -30 },
+            { text: 'Networking', dir: 'top', delay: 1.5, y: -40 },
+            { text: 'Cloud Solutions', dir: 'right', delay: 2.8, x: 30 },
+            { text: 'IT Support', dir: 'bottom', delay: 4.0, y: 40 },
+            { text: 'Software Dev', dir: 'left', delay: 5.2, x: -40 },
+            { text: 'Cybersecurity', dir: 'top', delay: 6.5, y: -35 },
+            { text: 'Cloud Infra', dir: 'right', delay: 7.8, x: 35 },
+            { text: 'Consulting', dir: 'bottom', delay: 9.0, y: 30 },
         ],
     },
     {
         color: '#ff5252',
-        lines: [
-            { text: 'DASHBOARDS', delay: 0.3, duration: 1.5 },
-            { text: 'Analytics', delay: 2.5, duration: 1.2 },
-            { text: 'KPI Reports', delay: 4.5, duration: 1.3 },
-            { text: 'Data Viz', delay: 6.5, duration: 1.1 },
+        words: [
+            { text: 'DASHBOARDS', dir: 'left', delay: 0.2, x: -30 },
+            { text: 'Analytics', dir: 'top', delay: 1.5, y: -40 },
+            { text: 'KPI Reports', dir: 'right', delay: 2.8, x: 30 },
+            { text: 'Data Viz', dir: 'bottom', delay: 4.0, y: 40 },
+            { text: 'Business Intel', dir: 'left', delay: 5.2, x: -40 },
+            { text: 'Real-time', dir: 'top', delay: 6.5, y: -35 },
+            { text: 'Monitoring', dir: 'right', delay: 7.8, x: 35 },
+            { text: 'Forecasts', dir: 'bottom', delay: 9.0, y: 30 },
         ],
     },
     {
         color: '#4ecdc4',
-        lines: [
-            { text: 'INNOVATIONS', delay: 0.3, duration: 1.5 },
-            { text: 'Artificial Intelligence', delay: 2.5, duration: 1.8 },
-            { text: 'IoT Solutions', delay: 5.0, duration: 1.3 },
-            { text: 'Smart Systems', delay: 7.0, duration: 1.3 },
+        words: [
+            { text: 'INNOVATIONS', dir: 'left', delay: 0.2, x: -30 },
+            { text: 'AI', dir: 'top', delay: 1.5, y: -40 },
+            { text: 'IoT', dir: 'right', delay: 2.8, x: 30 },
+            { text: 'Smart Systems', dir: 'bottom', delay: 4.0, y: 40 },
+            { text: 'Automation', dir: 'left', delay: 5.2, x: -40 },
+            { text: 'Blockchain', dir: 'top', delay: 6.5, y: -35 },
+            { text: 'Robotics', dir: 'right', delay: 7.8, x: 35 },
+            { text: '5G Solutions', dir: 'bottom', delay: 9.0, y: 30 },
         ],
     },
     {
         color: '#2d2d2d',
-        lines: [
-            { text: 'DIGITAL SOLUTIONS', delay: 0.3, duration: 1.7 },
-            { text: 'Web Development', delay: 2.8, duration: 1.4 },
-            { text: 'Mobile Apps', delay: 5.0, duration: 1.2 },
-            { text: 'ERP Systems', delay: 7.0, duration: 1.1 },
+        words: [
+            { text: 'DIGITAL SOLUTIONS', dir: 'left', delay: 0.2, x: -30 },
+            { text: 'Web Dev', dir: 'top', delay: 1.5, y: -40 },
+            { text: 'Mobile Apps', dir: 'right', delay: 2.8, x: 30 },
+            { text: 'ERP Systems', dir: 'bottom', delay: 4.0, y: 40 },
+            { text: 'Trainings', dir: 'left', delay: 5.2, x: -40 },
+            { text: 'Internships', dir: 'top', delay: 6.5, y: -35 },
+            { text: 'Digital Transform', dir: 'right', delay: 7.8, x: 35 },
+            { text: 'Cloud Migration', dir: 'bottom', delay: 9.0, y: 30 },
         ],
     },
 ];
 
-const HandWriting: React.FC<{ lines: WritingLine[]; color: string }> = ({ lines, color }) => {
-    const [revealedCount, setRevealedCount] = useState(0);
+const entryVariants = {
+    left: { initial: { opacity: 0, x: -80 }, animate: { opacity: 1, x: 0 } },
+    right: { initial: { opacity: 0, x: 80 }, animate: { opacity: 1, x: 0 } },
+    top: { initial: { opacity: 0, y: -60 }, animate: { opacity: 1, y: 0 } },
+    bottom: { initial: { opacity: 0, y: 60 }, animate: { opacity: 1, y: 0 } },
+};
+
+const AnimatedWords: React.FC<{ words: WordItem[]; color: string }> = ({ words, color }) => {
+    const [visible, setVisible] = useState<number[]>([]);
 
     useEffect(() => {
-        setRevealedCount(0);
+        setVisible([]);
         const timers: number[] = [];
-        lines.forEach((line) => {
+        words.forEach((_, i) => {
             const t = window.setTimeout(() => {
-                setRevealedCount((prev) => prev + 1);
-            }, line.delay * 1000);
+                setVisible((prev) => [...prev, i]);
+            }, words[i].delay * 1000);
             timers.push(t);
         });
         return () => timers.forEach(clearTimeout);
-    }, [lines]);
+    }, [words]);
 
     return (
-        <div className="handwriting-wrap">
-            <svg viewBox="0 0 400 160" className="handwriting-svg">
-                <defs>
-                    <clipPath id={`reveal-${color.replace('#', '')}`}>
-                        <rect x="0" y="0" width="400" height="160" />
-                    </clipPath>
-                </defs>
-                {lines.map((line, i) => (
-                    <g key={i}>
-                        <text
-                            x="90"
-                            y={38 + i * 32}
-                            className="hw-text"
-                            fill={color}
-                            opacity={i < revealedCount ? 1 : 0}
-                            style={{
-                                transition: `opacity 0.3s ease ${(line.duration - 0.3).toFixed(1)}s`,
-                            }}
-                        >
-                            {line.text}
-                        </text>
-                        <text
-                            x="90"
-                            y={38 + i * 32}
-                            className="hw-text-stroke"
-                            fill="none"
-                            stroke={color}
-                            strokeWidth="2"
-                            strokeDasharray="400"
-                            strokeDashoffset={i < revealedCount ? 0 : 400}
-                            style={{
-                                transition: `stroke-dashoffset ${line.duration}s ease ${line.delay}s`,
-                            }}
-                        >
-                            {line.text}
-                        </text>
-                    </g>
-                ))}
-                <g
-                    className="hand-pen"
-                    style={{
-                        transition: 'transform 1s ease',
-                        transform: `translateX(${Math.min(revealedCount * 80, 280)}px)`,
-                    }}
-                >
-                    <path
-                        d="M28 80 Q30 76 34 74 L38 72 Q40 74 38 78 L34 82 Q30 84 28 80Z"
-                        fill={color}
-                        opacity="0.9"
-                    />
-                    <line x1="38" y1="74" x2="56" y2="70" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
-                    <circle cx="32" cy="76" r="8" fill={color} opacity="0.15" />
-                    <path
-                        d="M22 78 Q20 72 24 68 Q28 64 32 66"
-                        stroke={color}
-                        strokeWidth="2"
-                        fill="none"
-                        strokeLinecap="round"
-                        opacity="0.7"
-                    />
-                    <line x1="56" y1="70" x2="62" y2="68" stroke={color} strokeWidth="1.5" strokeLinecap="round" opacity="0.5" />
-                </g>
-            </svg>
+        <div className="hw-board">
+            {words.map((w, i) => {
+                const v = entryVariants[w.dir];
+                return (
+                    <motion.span
+                        key={i}
+                        className={`hw-word hw-dir-${w.dir}`}
+                        style={{ color, '--hw-color': color } as React.CSSProperties}
+                        initial={v.initial}
+                        animate={visible.includes(i) ? v.animate : v.initial}
+                        transition={{ duration: 0.7, ease: 'easeOut' }}
+                    >
+                        {w.text}
+                    </motion.span>
+                );
+            })}
+            <motion.div
+                className="hw-pen-icon"
+                style={{ color }}
+                animate={{
+                    x: [0, 6, -2, 4, 0],
+                    y: [0, -4, 2, -2, 0],
+                }}
+                transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+            >
+                ✏️
+            </motion.div>
         </div>
     );
 };
 
 const slides = [
-    { data: writingLines[0] },
-    { data: writingLines[1] },
-    { data: writingLines[2] },
-    { data: writingLines[3] },
+    { data: slideData[0] },
+    { data: slideData[1] },
+    { data: slideData[2] },
+    { data: slideData[3] },
 ];
 
 const Hero: React.FC<HeroProps> = ({ profile }) => {
@@ -158,7 +148,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
     }, []);
 
     useEffect(() => {
-        const timer = setInterval(next, 12000);
+        const timer = setInterval(next, 14000);
         return () => clearInterval(timer);
     }, [next]);
 
@@ -194,7 +184,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                                     exit={{ opacity: 0, x: -60 }}
                                     transition={{ duration: 0.8 }}
                                 >
-                                    <HandWriting lines={slides[current].data.lines} color={slides[current].data.color} />
+                                    <AnimatedWords words={slides[current].data.words} color={slides[current].data.color} />
                                 </motion.div>
                             </AnimatePresence>
                         </div>
