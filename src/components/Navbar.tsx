@@ -42,7 +42,7 @@ const Navbar: React.FC = () => {
                             borderRadius: '50%', display: 'inline-block', flexShrink: 0,
                         }} />
                         <span style={{ fontWeight: 800, fontSize: '1.6rem', color: 'var(--text-main)' }}>
-                            MAKE IT SOLUTIONS (MIS)
+                            Think. Create. Connect.
                         </span>
                     </div>
 
