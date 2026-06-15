@@ -110,50 +110,6 @@ const HandWriting: React.FC<{ lines: WritingLine[]; color: string }> = ({ lines,
                         </text>
                     </g>
                 ))}
-                <g
-                    className="hand-pen"
-                    style={{
-                        transition: 'transform 1s ease',
-                        transform: `translateX(${Math.min(revealedCount * 80, 280)}px)`,
-                    }}
-                >
-                    <g className="hp-hand">
-                        <path
-                            d="M14,90 C10,84 12,76 16,70 C20,66 28,66 32,72
-                               C34,76 34,82 36,86 C38,90 40,94 34,96
-                               C26,98 18,96 14,90 Z"
-                            fill="#eac8b0" stroke="#c9a686" strokeWidth="1"
-                        />
-                        <path
-                            d="M18,70 C16,64 20,58 26,60 C32,62 34,68 32,72"
-                            fill="#eac8b0" stroke="#c9a686" strokeWidth="1"
-                        />
-                        <path
-                            d="M32,84 C30,90 34,96 40,94 C44,92 44,86 40,80"
-                            fill="#e0b898" stroke="#c9a686" strokeWidth="1"
-                        />
-                        <path
-                            d="M24,86 C22,94 28,100 34,98 C38,96 36,88 32,82"
-                            fill="#d4ac8c" stroke="#c9a686" strokeWidth="1"
-                        />
-                        <path
-                            d="M14,90 C12,86 14,82 18,80 C22,78 26,78 28,82"
-                            fill="none" stroke="#c9a686" strokeWidth="0.6" opacity="0.5"
-                        />
-                    </g>
-                    <g className="hp-pen">
-                        <path
-                            d="M32,86 L76,70 L80,78 L36,94 Z"
-                            fill="#2d2d2d" stroke="#1a1a1a" strokeWidth="0.8"
-                        />
-                        <path
-                            d="M76,70 L90,66 L80,78 Z"
-                            fill={color}
-                        />
-                        <line x1="38" y1="87" x2="74" y2="73" stroke="#555" strokeWidth="1" opacity="0.3" />
-                        <circle cx="36" cy="85" r="2" fill={color} opacity="0.5" />
-                    </g>
-                </g>
             </svg>
         </div>
     );
