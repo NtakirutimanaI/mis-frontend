@@ -24,16 +24,18 @@ const Navbar: React.FC = () => {
         <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
             <div className="container">
                 <div className="navbar-content">
-                    {/* Left: Brand that appears only while scrolling */}
+                    {/* Centered brand that appears only while scrolling */}
                     <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
+                        position: 'absolute',
+                        left: '50%',
+                        transform: isScrolling ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(-8px)',
                         opacity: isScrolling ? 1 : 0,
-                        transform: isScrolling ? 'translateY(0)' : 'translateY(-8px)',
                         transition: 'opacity 0.25s ease, transform 0.25s ease',
                         pointerEvents: 'none',
                         whiteSpace: 'nowrap',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
                     }}>
                         <span style={{
                             width: '12px', height: '12px', background: 'var(--primary)',
@@ -45,7 +47,7 @@ const Navbar: React.FC = () => {
                     </div>
 
                     {/* Right: Navigation Links */}
-                    <div className="navbar-links" style={{ marginLeft: 'auto' }}>
+                    <div className="navbar-links">
                         <a href="/#resume" className="nav-link">Company</a>
                         <span className="nav-separator">|</span>
                         <a href="/#projects" className="nav-link">Projects</a>
