@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { FaWhatsapp } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
@@ -10,8 +11,23 @@ interface PublicLayoutProps {
 }
 
 const PublicLayout: React.FC<PublicLayoutProps> = ({ profile }) => {
+    const [scrollProgress, setScrollProgress] = useState(0);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            setScrollProgress(docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0);
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     return (
         <div className="flex flex-col min-h-screen">
+            <div className="scroll-progress">
+                <div className="scroll-progress__fill" style={{ transform: `scaleX(${scrollProgress})`, transformOrigin: 'left center' }} />
+            </div>
             <Navbar />
             <main className="flex-grow">
                 <Outlet context={{ profile }} />

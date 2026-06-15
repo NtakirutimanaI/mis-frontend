@@ -25,10 +25,15 @@ const Home = () => {
     return (
         <>
             <Hero profile={profile} />
+            <div className="section-divider" />
             <Experience profile={profile} />
+            <div className="section-divider" />
             <Projects profile={profile} />
+            <div className="section-divider" />
             <TeamMembers profile={profile} />
+            <div className="section-divider" />
             <Certifications profile={profile} />
+            <div className="section-divider" />
             <Contact profile={profile} />
         </>
     );
