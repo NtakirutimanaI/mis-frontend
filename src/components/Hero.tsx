@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaPlay, FaServer, FaChartBar, FaLightbulb, FaLaptopCode } from 'react-icons/fa';
 import type { Profile } from '../services/profileService';
 
 interface HeroProps {
@@ -12,21 +12,25 @@ const slides = [
         title: 'Our ICT Services',
         description: 'Enterprise-grade IT solutions tailored to your business needs.',
         color: '#7BC043',
+        icon: <FaServer />,
     },
     {
         title: 'Dashboards',
         description: 'Real-time analytics and monitoring dashboards for data-driven decisions.',
         color: '#ff5252',
+        icon: <FaChartBar />,
     },
     {
         title: 'Our Innovations',
         description: 'Cutting-edge technology innovations driving digital transformation.',
         color: '#4ecdc4',
+        icon: <FaLightbulb />,
     },
     {
         title: 'Digital Solutions',
         description: 'End-to-end digital solutions from concept to deployment.',
         color: '#2d2d2d',
+        icon: <FaLaptopCode />,
     },
 ];
 
@@ -79,9 +83,18 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                                     exit={{ opacity: 0, x: -60 }}
                                     transition={{ duration: 0.8 }}
                                 >
+                                    <div className="hero-slide-bg-anim">
+                                        <span className="hero-slide-circle c1" />
+                                        <span className="hero-slide-circle c2" />
+                                        <span className="hero-slide-circle c3" />
+                                    </div>
+                                    <div className="hero-slide-icon">{slides[current].icon}</div>
                                     <div className="hero-slide-content">
                                         <h3 className="hero-slide-title">{slides[current].title}</h3>
                                         <p className="hero-slide-desc">{slides[current].description}</p>
+                                    </div>
+                                    <div className="hero-slide-play">
+                                        <FaPlay />
                                     </div>
                                 </motion.div>
                             </AnimatePresence>
