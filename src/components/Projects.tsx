@@ -8,13 +8,10 @@ const Projects: React.FC<ProjectsProps> = ({ profile }) => {
     const displayProjects = profile.projects || [];
 
     return (
-        <section className="section" id="projects">
+        <section className="section section-indicator" id="projects">
             <div className="container">
-                <div style={{ marginBottom: '2rem' }}>
-                    <h1 style={{ fontSize: '3rem', fontWeight: 800 }}>Projects</h1>
-                </div>
-
-                <div>
+                <h2 className="ark-section__heading">Projects</h2>
+                <div className="ark-grid-3">
                     {displayProjects.map((project, index) => {
                         const projectUrl = project.url && !project.url.startsWith('http://') && !project.url.startsWith('https://')
                             ? `https://${project.url}`
@@ -24,62 +21,62 @@ const Projects: React.FC<ProjectsProps> = ({ profile }) => {
                             : project.githubUrl;
 
                         return (
-                        <div key={index} className="project-item">
-                            <div className="project-text">
-                                <h3 className="project-name">{project.name}</h3>
-
-                                {/* Type and Role on same row */}
-                                {(project.type || project.role) && (
-                                    <div style={{
-                                        display: 'flex',
-                                        gap: '1.5rem',
-                                        marginTop: '0.5rem',
-                                        marginBottom: '1rem',
-                                        fontSize: '0.9rem',
-                                        color: 'var(--text-muted)'
-                                    }}>
-                                        {project.type && (
-                                            <span>
-                                                <strong style={{ color: 'var(--text-main)' }}>Type:</strong> {project.type}
-                                            </span>
-                                        )}
-                                        {project.role && (
-                                            <span>
-                                                <strong style={{ color: 'var(--text-main)' }}>Role:</strong> {project.role}
-                                            </span>
-                                        )}
-                                    </div>
-                                )}
-
-                                <p className="project-desc-text">
-                                    {project.description || "I'm a paragraph. Click here to add your own text and edit me. It's easy. Just click \"Edit Text\" or double click me to add your own content and make changes to the font."}
-                                </p>
-                                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-                                    {projectUrl && (
-                                        <a href={projectUrl} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ fontSize: '0.85rem', padding: '0.4rem 1rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                                            View Project
-                                        </a>
-                                    )}
-                                    {githubUrl && (
-                                        <a href={githubUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.85rem', padding: '0.4rem 1rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px', border: '1px solid var(--border-color)', borderRadius: '6px', color: 'var(--text-main)', fontWeight: 600 }}>
-                                            GitHub
-                                        </a>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="project-image-container">
+                            <div key={index} className="ark-card" style={{ display: 'flex', flexDirection: 'column' }}>
                                 {project.imageUrl ? (
-                                    <img src={project.imageUrl} alt={project.name} className="project-image" />
+                                    <img src={project.imageUrl} alt={project.name} className="ark-card__img" />
                                 ) : (
-                                    <div className="project-image" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#e5e7eb', color: '#9ca3af' }}>
+                                    <div className="ark-card__img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-body)', color: 'var(--text-muted)' }}>
                                         No Image
                                     </div>
                                 )}
+                                <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>{project.name}</h3>
+
+                                    {(project.type || project.role) && (
+                                        <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                                            {project.type && (
+                                                <span><strong style={{ color: 'var(--text-main)' }}>Type:</strong> {project.type}</span>
+                                            )}
+                                            {project.role && (
+                                                <span><strong style={{ color: 'var(--text-main)' }}>Role:</strong> {project.role}</span>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <p className="clamp-3" style={{ fontSize: '0.9rem', lineHeight: '1.6', color: 'var(--text-muted)', margin: 0 }}>
+                                        {project.description || "I'm a paragraph. Click here to add your own text and edit me."}
+                                    </p>
+
+                                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: 'auto', paddingTop: '0.75rem' }}>
+                                        {projectUrl && (
+                                            <a href={projectUrl} target="_blank" rel="noopener noreferrer"
+                                                style={{
+                                                    fontSize: '0.85rem', padding: '0.4rem 1rem',
+                                                    background: 'var(--primary)', color: '#000', borderRadius: '6px',
+                                                    fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                }}>
+                                                View Project
+                                            </a>
+                                        )}
+                                        {githubUrl && (
+                                            <a href={githubUrl} target="_blank" rel="noopener noreferrer"
+                                                style={{
+                                                    fontSize: '0.85rem', padding: '0.4rem 1rem',
+                                                    border: '1px solid var(--border-color)', borderRadius: '6px',
+                                                    color: 'var(--text-main)', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                }}>
+                                                GitHub
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    );
+                        );
                     })}
                 </div>
+                {displayProjects.length === 0 && (
+                    <p style={{ color: 'var(--text-muted)' }}>No projects added yet.</p>
+                )}
             </div>
         </section>
     );
