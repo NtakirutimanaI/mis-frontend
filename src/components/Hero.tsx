@@ -158,7 +158,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
     }, []);
 
     useEffect(() => {
-        const timer = setInterval(next, 8000);
+        const timer = setInterval(next, 12000);
         return () => clearInterval(timer);
     }, [next]);
 
