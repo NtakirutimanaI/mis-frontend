@@ -22,36 +22,48 @@ const writingLines: SlideData[] = [
         color: '#7BC043',
         lines: [
             { text: 'ICT SERVICES', delay: 0.3, duration: 1.5 },
-            { text: 'Networking', delay: 2.5, duration: 1.2 },
-            { text: 'Cloud Solutions', delay: 4.5, duration: 1.4 },
-            { text: 'IT Support', delay: 6.5, duration: 1.2 },
+            { text: 'Networking', delay: 2.0, duration: 1.2 },
+            { text: 'Cloud Solutions', delay: 3.5, duration: 1.4 },
+            { text: 'IT Support', delay: 5.0, duration: 1.2 },
+            { text: 'Software Dev', delay: 6.5, duration: 1.3 },
+            { text: 'Cybersecurity', delay: 8.0, duration: 1.4 },
+            { text: 'Cloud Infra', delay: 9.5, duration: 1.2 },
         ],
     },
     {
         color: '#ff5252',
         lines: [
             { text: 'DASHBOARDS', delay: 0.3, duration: 1.5 },
-            { text: 'Analytics', delay: 2.5, duration: 1.2 },
-            { text: 'KPI Reports', delay: 4.5, duration: 1.3 },
-            { text: 'Data Viz', delay: 6.5, duration: 1.1 },
+            { text: 'Analytics', delay: 2.0, duration: 1.2 },
+            { text: 'KPI Reports', delay: 3.5, duration: 1.3 },
+            { text: 'Data Viz', delay: 5.0, duration: 1.1 },
+            { text: 'Business Intel', delay: 6.5, duration: 1.4 },
+            { text: 'Real-time', delay: 8.0, duration: 1.2 },
+            { text: 'Monitoring', delay: 9.5, duration: 1.3 },
         ],
     },
     {
         color: '#4ecdc4',
         lines: [
             { text: 'INNOVATIONS', delay: 0.3, duration: 1.5 },
-            { text: 'Artificial Intelligence', delay: 2.5, duration: 1.8 },
-            { text: 'IoT Solutions', delay: 5.0, duration: 1.3 },
-            { text: 'Smart Systems', delay: 7.0, duration: 1.3 },
+            { text: 'Artificial Intelligence', delay: 2.0, duration: 1.8 },
+            { text: 'IoT Solutions', delay: 4.0, duration: 1.3 },
+            { text: 'Smart Systems', delay: 5.5, duration: 1.3 },
+            { text: 'Automation', delay: 7.0, duration: 1.2 },
+            { text: 'Blockchain', delay: 8.5, duration: 1.3 },
+            { text: 'Robotics', delay: 10.0, duration: 1.2 },
         ],
     },
     {
         color: '#2d2d2d',
         lines: [
             { text: 'DIGITAL SOLUTIONS', delay: 0.3, duration: 1.7 },
-            { text: 'Web Development', delay: 2.8, duration: 1.4 },
-            { text: 'Mobile Apps', delay: 5.0, duration: 1.2 },
-            { text: 'ERP Systems', delay: 7.0, duration: 1.1 },
+            { text: 'Web Development', delay: 2.3, duration: 1.4 },
+            { text: 'Mobile Apps', delay: 4.0, duration: 1.2 },
+            { text: 'ERP Systems', delay: 5.5, duration: 1.1 },
+            { text: 'Trainings', delay: 7.0, duration: 1.3 },
+            { text: 'Internships', delay: 8.5, duration: 1.3 },
+            { text: 'Digital Transform', delay: 10.0, duration: 1.4 },
         ],
     },
 ];
@@ -73,17 +85,17 @@ const HandWriting: React.FC<{ lines: WritingLine[]; color: string }> = ({ lines,
 
     return (
         <div className="handwriting-wrap">
-            <svg viewBox="0 0 400 160" className="handwriting-svg">
+            <svg viewBox="0 0 500 260" className="handwriting-svg">
                 <defs>
                     <clipPath id={`reveal-${color.replace('#', '')}`}>
-                        <rect x="0" y="0" width="400" height="160" />
+                        <rect x="0" y="0" width="500" height="260" />
                     </clipPath>
                 </defs>
                 {lines.map((line, i) => (
                     <g key={i}>
                         <text
-                            x="90"
-                            y={38 + i * 32}
+                            x="30"
+                            y={34 + i * 28}
                             className="hw-text"
                             fill={color}
                             opacity={i < revealedCount ? 1 : 0}
@@ -94,14 +106,14 @@ const HandWriting: React.FC<{ lines: WritingLine[]; color: string }> = ({ lines,
                             {line.text}
                         </text>
                         <text
-                            x="90"
-                            y={38 + i * 32}
+                            x="30"
+                            y={34 + i * 28}
                             className="hw-text-stroke"
                             fill="none"
                             stroke={color}
                             strokeWidth="2"
-                            strokeDasharray="400"
-                            strokeDashoffset={i < revealedCount ? 0 : 400}
+                            strokeDasharray="600"
+                            strokeDashoffset={i < revealedCount ? 0 : 600}
                             style={{
                                 transition: `stroke-dashoffset ${line.duration}s ease ${line.delay}s`,
                             }}
@@ -114,7 +126,7 @@ const HandWriting: React.FC<{ lines: WritingLine[]; color: string }> = ({ lines,
                     className="hand-pen"
                     style={{
                         transition: 'transform 1s ease',
-                        transform: `translateX(${Math.min(revealedCount * 80, 280)}px)`,
+                        transform: `translateX(${Math.min(revealedCount * 65, 390)}px)`,
                     }}
                 >
                     <path
@@ -158,7 +170,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
     }, []);
 
     useEffect(() => {
-        const timer = setInterval(next, 12000);
+        const timer = setInterval(next, 15000);
         return () => clearInterval(timer);
     }, [next]);
 
