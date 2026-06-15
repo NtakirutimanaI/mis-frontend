@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import type { Profile } from '../services/profileService';
@@ -124,6 +124,23 @@ const slides = [
 
 const Hero: React.FC<HeroProps> = ({ profile }) => {
     const [current, setCurrent] = useState(0);
+    const [showNav, setShowNav] = useState(false);
+    const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+    const showNavTemporarily = useCallback(() => {
+        setShowNav(true);
+        clearTimeout(hideTimer.current);
+        hideTimer.current = setTimeout(() => setShowNav(false), 3000);
+    }, []);
+
+    const handleMouseLeave = useCallback(() => {
+        clearTimeout(hideTimer.current);
+        setShowNav(false);
+    }, []);
+
+    useEffect(() => {
+        return () => clearTimeout(hideTimer.current);
+    }, []);
 
     const next = useCallback(() => {
         setCurrent((prev) => (prev + 1) % slides.length);
@@ -139,7 +156,12 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
     }, [next]);
 
     return (
-        <section className="hero section" id="home">
+        <section
+            className={`hero section${showNav ? ' show-nav' : ''}`}
+            id="home"
+            onMouseMove={showNavTemporarily}
+            onMouseLeave={handleMouseLeave}
+        >
             <div className="container">
                 <div className="hero-grid">
                     {/* Left: Logo */}

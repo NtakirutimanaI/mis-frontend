@@ -1356,8 +1356,8 @@ img {
   pointer-events: none;
 }
 
-.hero:hover .hero-slider-arrow,
-.hero-slider:hover .hero-slider-arrow {
+.hero.show-nav .hero-slider-arrow,
+.hero.show-nav .hero-slider-dots {
   opacity: 1;
   pointer-events: auto;
 }
@@ -1373,11 +1373,6 @@ img {
   gap: 0.4rem;
   opacity: 0;
   transition: opacity 0.3s ease;
-}
-
-.hero:hover .hero-slider-dots,
-.hero-slider:hover .hero-slider-dots {
-  opacity: 1;
 }
 
 .hero-slider-dot {
