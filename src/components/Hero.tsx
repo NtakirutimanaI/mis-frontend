@@ -68,6 +68,7 @@ const slides = [
 
 const Hero: React.FC<HeroProps> = ({ profile }) => {
     const [current, setCurrent] = useState(0);
+    const [hoveredCard, setHoveredCard] = useState<number | null>(null);
     const [showNav, setShowNav] = useState(false);
     const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
     const autoTimer = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
@@ -100,20 +101,28 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
         return () => clearInterval(autoTimer.current);
     }, [next]);
 
-    const goToSlide = useCallback((index: number) => {
-        setCurrent(index);
+    const sideCardEnter = useCallback((index: number) => {
+        setHoveredCard(index);
         clearInterval(autoTimer.current);
+    }, []);
+
+    const sideCardLeave = useCallback(() => {
+        setHoveredCard(null);
         autoTimer.current = setInterval(next, 12000);
     }, [next]);
 
+    const displayIndex = hoveredCard !== null ? hoveredCard : current;
+
     const handlePrev = useCallback(() => {
         prev();
+        setHoveredCard(null);
         clearInterval(autoTimer.current);
         autoTimer.current = setInterval(next, 12000);
     }, [prev, next]);
 
     const handleNext = useCallback(() => {
         next();
+        setHoveredCard(null);
         clearInterval(autoTimer.current);
         autoTimer.current = setInterval(next, 12000);
     }, [next]);
@@ -128,12 +137,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
             <div className="container">
                 <div className="hero-grid">
                     {/* Left: Logo */}
-                    <motion.div
-                        className="hero-avatar-container"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.8 }}
-                    >
+                    <div className="hero-avatar-container">
                         {profile.avatar ? (
                             <img src={profile.avatar} alt="Profile" className="hero-avatar" />
                         ) : (
@@ -141,7 +145,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                                 {profile.firstName[0]}{profile.lastName[0]}
                             </div>
                         )}
-                    </motion.div>
+                    </div>
 
                     {/* Right: Image Slider */}
                     <div className="hero-slider">
@@ -149,30 +153,32 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                             <div className="hero-slider-viewport">
                                 <AnimatePresence mode="wait">
                                     <motion.div
-                                        key={current}
+                                        key={displayIndex}
                                         className="hero-slide"
-                                        style={{ backgroundImage: `url(${slides[current].bg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                                        style={{ backgroundImage: `url(${slides[displayIndex].bg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
                                         transition={{ duration: 0.3 }}
                                     >
                                         <div className="hero-slide-overlay" />
-                                        <SlideText data={slides[current].data} />
+                                        <SlideText data={slides[displayIndex].data} />
                                     </motion.div>
                                 </AnimatePresence>
                             </div>
                             <div
-                                className={`hero-side-card ${current === 4 ? 'active' : ''}`}
+                                className={`hero-side-card ${hoveredCard === 4 ? 'active' : ''}`}
                                 style={{ backgroundImage: 'url(https://picsum.photos/seed/heroside2/100/800)', backgroundSize: 'cover', backgroundPosition: 'center' }}
-                                onClick={() => goToSlide(4)}
+                                onMouseEnter={() => sideCardEnter(4)}
+                                onMouseLeave={sideCardLeave}
                             >
                                 <span className="hero-side-card__label">About us</span>
                             </div>
                             <div
-                                className={`hero-side-card ${current === 5 ? 'active' : ''}`}
+                                className={`hero-side-card ${hoveredCard === 5 ? 'active' : ''}`}
                                 style={{ backgroundImage: 'url(https://picsum.photos/seed/heroside3/100/800)', backgroundSize: 'cover', backgroundPosition: 'center' }}
-                                onClick={() => goToSlide(5)}
+                                onMouseEnter={() => sideCardEnter(5)}
+                                onMouseLeave={sideCardLeave}
                             >
                                 <span className="hero-side-card__label">About us</span>
                             </div>
@@ -186,8 +192,8 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                                 {slides.slice(0, 4).map((_, i) => (
                                     <span
                                         key={i}
-                                        className={`hero-slider-dot ${i === current ? 'active' : ''}`}
-                                        onClick={() => goToSlide(i)}
+                                        className={`hero-slider-dot ${i === displayIndex ? 'active' : ''}`}
+                                        onClick={() => { setCurrent(i); setHoveredCard(null); }}
                                     />
                                 ))}
                             </div>

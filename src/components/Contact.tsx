@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaPlus } from 'react-icons/fa';
+import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaPlus, FaYoutube, FaInstagram, FaLinkedin, FaWhatsapp } from 'react-icons/fa';
 import { profileService, type ContactMessage, type Profile } from '../services/profileService';
 import { useToast } from '../context/ToastContext';
 
@@ -69,7 +69,7 @@ const Contact: React.FC<ContactProps> = ({ profile }) => {
     return (
         <section className="section" id="contact" style={{ borderBottom: 'none', padding: '60px 0' }}>
             <div className="container">
-                <h2 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '0.5rem' }}>Contact</h2>
+                <h2 className="ark-section__heading" style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '0.5rem' }}>Get In Touch</h2>
                 <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', maxWidth: '400px' }}>Looking forward to hearing from you</p>
 
                 {/* Grid: Form + Info */}
@@ -140,6 +140,16 @@ const Contact: React.FC<ContactProps> = ({ profile }) => {
                                     <h4>Location</h4>
                                     <p>{profile.location || 'Kigali, Rwanda'}</p>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div className="ark-contact__social">
+                            <h4 className="ark-contact__social-title">Follow Us</h4>
+                            <div className="ark-contact__social-links">
+                                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="ark-contact__social-link" title="YouTube"><FaYoutube /></a>
+                                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="ark-contact__social-link" title="Instagram"><FaInstagram /></a>
+                                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="ark-contact__social-link" title="LinkedIn"><FaLinkedin /></a>
+                                <a href="https://wa.me/250787832490" target="_blank" rel="noopener noreferrer" className="ark-contact__social-link" title="WhatsApp"><FaWhatsapp /></a>
                             </div>
                         </div>
                     </div>

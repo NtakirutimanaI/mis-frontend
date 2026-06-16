@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import type { Profile } from '../services/profileService';
 
 interface ProjectsProps {
@@ -8,10 +9,25 @@ const Projects: React.FC<ProjectsProps> = ({ profile }) => {
     const displayProjects = profile.projects || [];
 
     return (
-        <section className="section" id="projects">
+        <section className="section projects" id="projects">
             <div className="container">
+                <span className="ark-section__sub" style={{ display: 'inline-block', marginLeft: '30px', color: '#fff' }}>
+                    What We Do
+                </span>
                 <h2 className="ark-section__heading">Projects</h2>
-                <div className="ark-grid-3">
+                <motion.p
+                    style={{
+                        maxWidth: '600px', margin: '0 auto 3rem', color: 'var(--text-muted)',
+                        fontSize: '1.05rem', lineHeight: '1.7'
+                    }}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
+                >
+                    All our projects are fully responsive, dynamic with both backend and frontend as each content (colors, images, texts) on a page can be modified by project admin himself. Some of our successful projects showcase
+                </motion.p>
+                <div className="projects__grid">
                     {displayProjects.map((project, index) => {
                         const projectUrl = project.url && !project.url.startsWith('http://') && !project.url.startsWith('https://')
                             ? `https://${project.url}`
@@ -21,48 +37,45 @@ const Projects: React.FC<ProjectsProps> = ({ profile }) => {
                             : project.githubUrl;
 
                         return (
-                            <div key={index} className="ark-card">
-                                {project.imageUrl ? (
-                                    <img src={project.imageUrl} alt={project.name} className="ark-card__img" />
-                                ) : (
-                                    <div className="ark-card__img">
-                                        No Image
+                            <div key={index} className="project-card">
+                                <div className="project-card__img">
+                                    <div className="project-card__img-rotate">
+                                        {project.imageUrl ? (
+                                            <img src={project.imageUrl} alt={project.name} />
+                                        ) : (
+                                            <div className="project-card__placeholder">No Image</div>
+                                        )}
                                     </div>
-                                )}
-                                <div className="ark-card__body">
-                                    <h3>{project.name}</h3>
+                                    <div className="project-card__overlay">
+                                        <span>{project.name}</span>
+                                    </div>
+                                </div>
+                                <div className="project-card__body">
+                                    <h3 className="project-card__title">{project.name}</h3>
 
                                     {(project.type || project.role) && (
-                                        <div>
-                                            {project.type && (
-                                                <span><strong>Type:</strong> {project.type}</span>
-                                            )}
-                                            {project.role && (
-                                                <span><strong>Role:</strong> {project.role}</span>
-                                            )}
+                                        <div className="project-card__meta">
+                                            {project.type && <span>{project.type}</span>}
+                                            {project.role && <span>{project.role}</span>}
                                         </div>
                                     )}
 
                                     {project.technologies && project.technologies.length > 0 && (
-                                        <div>
+                                        <div className="project-card__techs">
                                             {project.technologies.map((tech: string) => (
                                                 <span key={tech} className="tech-pill">{tech}</span>
                                             ))}
                                         </div>
                                     )}
 
-                                    <p className="clamp-3">
-                                        {project.description || "I'm a paragraph. Click here to add your own text and edit me."}
-                                    </p>
-
-                                    <div>
+                                    <div className="project-card__actions">
                                         {projectUrl && (
-                                            <a href={projectUrl} target="_blank" rel="noopener noreferrer">
+                                            <a href={projectUrl} target="_blank" rel="noopener noreferrer" className="project-card__link">
                                                 View Project
                                             </a>
                                         )}
                                         {githubUrl && (
-                                            <a href={githubUrl} target="_blank" rel="noopener noreferrer">
+                                            <a href={githubUrl} target="_blank" rel="noopener noreferrer" className="project-card__link">
                                                 GitHub
                                             </a>
                                         )}
@@ -72,8 +85,15 @@ const Projects: React.FC<ProjectsProps> = ({ profile }) => {
                         );
                     })}
                 </div>
+                {displayProjects.length > 0 && (
+                    <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
+                        <a href="#contact" className="projects__view-all">
+                            View All Projects ({displayProjects.length})
+                        </a>
+                    </div>
+                )}
                 {displayProjects.length === 0 && (
-                    <p>No projects added yet.</p>
+                    <p className="projects__empty">No projects added yet.</p>
                 )}
             </div>
         </section>

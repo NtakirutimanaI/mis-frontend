@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { FaLaptopCode, FaMobileAlt, FaCloud, FaPaintBrush, FaHeadset, FaRocket, FaChartLine, FaShieldAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaLaptopCode, FaMobileAlt, FaCloud, FaPaintBrush, FaHeadset, FaRocket, FaShieldAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const offerings = [
     {
@@ -29,13 +29,6 @@ const offerings = [
         title: 'UI/UX Design',
         description: 'Pixel-perfect, accessible interfaces and intuitive user experiences using Figma, Tailwind CSS, and Framer Motion — from wireframes to polished prototypes.',
         color: '#ff9f43',
-        tags: ['Booking & Reservation', 'Ecommerce', 'Portfolio', 'Education', 'Job Portals', 'Real Estate', "NGO's", 'Blog'],
-    },
-    {
-        icon: FaChartLine,
-        title: 'Data Analytics',
-        description: 'Interactive dashboards, KPI reports, and data visualization solutions that turn raw data into actionable business intelligence.',
-        color: '#a29bfe',
         tags: ['Booking & Reservation', 'Ecommerce', 'Portfolio', 'Education', 'Job Portals', 'Real Estate', "NGO's", 'Blog'],
     },
     {
@@ -121,44 +114,38 @@ const WhatWeOffer = () => {
     return (
         <section className="section section-indicator section-offer-dark" id="offerings">
             <div className="container">
-                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                    <motion.span
-                        className="ark-section__sub"
-                        style={{ display: 'inline-block' }}
-                        animate={{ x: [-200, 200, -200] }}
-                        transition={{ duration: 30, repeat: Infinity, ease: 'easeInOut' }}
-                    >
-                        What We Offer
-                    </motion.span>
-                    <motion.h2
-                        className="ark-section__heading"
-                        style={{ textAlign: 'center' }}
-                        initial={{ opacity: 0, y: 40, scale: 0.9 }}
-                        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.15, ease: 'easeOut' }}
-                    >
-                        Our Core Services
-                    </motion.h2>
-                    <motion.p
-                        style={{
-                            maxWidth: '600px', margin: '0 auto', color: 'var(--text-muted)',
-                            fontSize: '1.05rem', lineHeight: '1.7'
-                        }}
-                        initial={{ opacity: 0, y: 30 }}
+                    <motion.div
+                        style={{ marginBottom: '3rem' }}
+                        initial={{ opacity: 0, y: 40 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
+                        transition={{ duration: 0.6, ease: 'easeOut' }}
                     >
-                        We deliver end-to-end digital solutions tailored to your business needs —
-                        from strategy and design to development and ongoing support.
-                    </motion.p>
-                </div>
+                        <span className="ark-section__sub" style={{ display: 'inline-block', marginLeft: '90px' }}>
+                            What We Offer
+                        </span>
+                        <h2 className="ark-section__heading">
+                            Core Services
+                        </h2>
+                        <motion.p
+                            style={{
+                                maxWidth: '600px', margin: '0 auto', color: 'var(--text-muted)',
+                                fontSize: '1.05rem', lineHeight: '1.7'
+                            }}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
+                        >
+                            We deliver end-to-end digital solutions tailored to your business needs —
+                            from strategy and design to development and ongoing support.
+                        </motion.p>
+                    </motion.div>
 
-                <div className="offer-list">
-                    {offerings.map((item, index) => {
-                        return (
-                            <motion.div
+                    <div className="offer-list">
+                        {offerings.map((item, index) => {
+                            return (
+                                <motion.div
                                 key={item.title}
                                 className={`offer-card offer-card--wide ${index >= 4 ? 'offer-card--centered' : ''} ${index === 1 || index === 2 || index === 5 || index === 6 ? 'offer-card--reverse' : ''}`}
                                 initial={{ opacity: 0, scale: 0.7, y: 40 }}
@@ -183,9 +170,9 @@ const WhatWeOffer = () => {
                                     </div>
                                 </div>
                             </motion.div>
-                        );
-                    })}
-                </div>
+                            );
+                        })}
+                    </div>
             </div>
         </section>
     );

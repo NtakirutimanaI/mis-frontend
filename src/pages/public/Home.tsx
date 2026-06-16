@@ -2,6 +2,8 @@ import Hero from '../../components/Hero';
 import WhatWeOffer from '../../components/WhatWeOffer';
 import Experience from '../../components/Experience';
 import Projects from '../../components/Projects';
+import LatestUpdates from '../../components/LatestUpdates';
+import Jobs from '../../components/Jobs';
 import TeamMembers from '../../components/TeamMembers';
 import Certifications from '../../components/Certifications';
 import Contact from '../../components/Contact';
@@ -32,6 +34,10 @@ const Home = () => {
             <Experience profile={profile} />
             <div className="section-divider" />
             <Projects profile={profile} />
+            <div className="section-divider" />
+            <LatestUpdates />
+            <div className="section-divider" />
+            <Jobs />
             <div className="section-divider" />
             <TeamMembers profile={profile} />
             <div className="section-divider" />

@@ -34,7 +34,9 @@ const Navbar: React.FC = () => {
                         <span className="nav-separator">|</span>
                         <a href="/#projects" className="nav-link">Projects</a>
                         <span className="nav-separator">|</span>
-                        <a href="/#contact" className="nav-link">Contact</a>
+                        <a href="/#jobs" className="nav-link">Careers</a>
+                        <span className="nav-separator">|</span>
+                        <a href="/#contact" className="nav-btn">Get in touch</a>
                         <span className="nav-separator">|</span>
                         <Link to="/login" className="nav-link" style={{ color: '#7BC043', fontWeight: 600 }}>Login</Link>
                     </div>
