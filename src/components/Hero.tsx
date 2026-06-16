@@ -137,14 +137,32 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
             <div className="container">
                 <div className="hero-grid">
                     {/* Left: Logo */}
-                    <div className="hero-avatar-container">
-                        {profile.avatar ? (
-                            <img src={profile.avatar} alt="Profile" className="hero-avatar" />
-                        ) : (
-                            <div className="hero-avatar hero-avatar-placeholder">
-                                {profile.firstName[0]}{profile.lastName[0]}
-                            </div>
-                        )}
+                    <div className="hero-left-col">
+                        <div className="hero-avatar-container">
+                            {profile.avatar ? (
+                                <img src={profile.avatar} alt="Profile" className="hero-avatar" />
+                            ) : (
+                                <div className="hero-avatar hero-avatar-placeholder">
+                                    {profile.firstName[0]}{profile.lastName[0]}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Stats (independent) */}
+                    <div className="hero-stats">
+                        <div className="hero-stat">
+                            <span className="hero-stat__value">4+</span>
+                            <span className="hero-stat__label">Years of Experience</span>
+                        </div>
+                        <div className="hero-stat">
+                            <span className="hero-stat__value">11+</span>
+                            <span className="hero-stat__label">Projects Completed</span>
+                        </div>
+                        <div className="hero-stat">
+                            <span className="hero-stat__value">5+</span>
+                            <span className="hero-stat__label">Team Members</span>
+                        </div>
                     </div>
 
                     {/* Right: Image Slider */}

@@ -25,7 +25,7 @@
   --font-main: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Helvetica', 'Arial', 'Inter', sans-serif;
   --font-display: "Futura", "Futura Std", "Century Gothic", "Trebuchet MS", sans-serif;
   --font-body: "Futura", "Futura Std", "Century Gothic", "Trebuchet MS", sans-serif;
-  --spacing-section: 60px;
+  --spacing-section: 30px;
 }
 
 /* -- Dark Mode Overrides -- */
@@ -34,8 +34,8 @@
   --bg-white: #1e1e1e;
   --bg-sidebar: #000000;
 
-  --text-main: #e0e0e0;
-  --text-muted: #a0a0a0;
+  --text-main: #ffffff;
+  --text-muted: #ffffff;
 
   --border-color: #333333;
 }
@@ -179,7 +179,7 @@ img {
   min-height: auto;
   display: block;
   padding-top: 0px;
-  padding-bottom: 6rem;
+  padding-bottom: 0;
   margin-top: 0;
 }
 
@@ -188,6 +188,7 @@ img {
   grid-template-columns: 1fr 1fr;
   align-items: start;
   gap: 3rem;
+  row-gap: 0;
 }
 
 .hero-avatar-container {
@@ -202,6 +203,50 @@ img {
   overflow: hidden;
   object-fit: cover;
   background: #ddd;
+  margin-right: 170px;
+  margin-top: 10px;
+}
+
+.hero-left-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2rem;
+  grid-row: 1;
+  grid-column: 1;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: nowrap;
+  grid-row: 2;
+  grid-column: 1;
+  margin-left: 770px;
+  margin-top: -120px;
+  margin-bottom: -40px;
+}
+
+.hero-stat {
+  text-align: center;
+}
+
+.hero-stat__value {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.hero-stat__label {
+  display: block;
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .hero-text-content {
@@ -2721,7 +2766,7 @@ img {
   align-items: stretch;
 }
 .ark-contact__card {
-  background: var(--bg-white);
+  background: var(--bg-body);
   border: 1px solid var(--border-color);
   padding: 2rem;
   transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
@@ -2887,7 +2932,7 @@ img {
   gap: 0.75rem;
 }
 .ark-contact__faq {
-  background: var(--bg-white);
+  background: var(--bg-body);
   border: 1px solid var(--border-color);
   border-radius: 10px;
   overflow: hidden;
@@ -2990,7 +3035,7 @@ img {
 
 /* Ark card */
 .ark-card {
-  background: var(--bg-white);
+  background: var(--bg-body);
   border: 1px solid var(--border-color);
   padding: 1.5rem;
   transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
