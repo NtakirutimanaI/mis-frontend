@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
@@ -15,6 +15,10 @@ const Login = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const redirect = searchParams.get('redirect') || '/admin';
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -260,7 +264,7 @@ const Login = () => {
                             onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
                         >
                             <FaArrowLeft size={11} />
-                            Back to Portfolio
+                            Back to Site
                         </Link>
                     </div>
                 </motion.div>

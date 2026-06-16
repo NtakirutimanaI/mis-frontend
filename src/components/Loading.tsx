@@ -14,35 +14,16 @@ const Loading = () => {
             background: 'var(--bg-body)',
             zIndex: 9999
         }}>
-            <div style={{ textAlign: 'center' }}>
-                <motion.div
-                    style={{
-                        width: '80px',
-                        height: '80px',
-                        margin: '0 auto 1.5rem',
-                        borderRadius: '50%',
-                        border: '5px solid var(--border-color)',
-                        borderTopColor: 'var(--primary)'
-                    }}
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                />
-                <motion.h2
-                    style={{
-                        fontSize: '1.5rem',
-                        fontWeight: 800,
-                        background: 'linear-gradient(135deg, var(--primary-red), var(--primary))',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        marginBottom: '0.5rem'
-                    }}
-                    animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                    Loading...
-                </motion.h2>
-                <p style={{ color: 'var(--text-muted)' }}>Please wait while we fetch the data...</p>
-            </div>
+            <motion.img
+                src="/logo.png"
+                alt="Logo"
+                style={{
+                    width: '120px',
+                    height: 'auto',
+                }}
+                animate={{ opacity: [0.3, 1, 0.3] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            />
         </div>
     );
 };
