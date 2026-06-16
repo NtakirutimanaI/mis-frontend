@@ -1,54 +1,36 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const Navbar: React.FC = () => {
     const [scrolled, setScrolled] = useState(false);
-    const [isScrolling, setIsScrolling] = useState(false);
-    const scrollTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 50);
-            setIsScrolling(true);
-            clearTimeout(scrollTimer.current);
-            scrollTimer.current = setTimeout(() => setIsScrolling(false), 400);
         };
         window.addEventListener('scroll', handleScroll);
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-            clearTimeout(scrollTimer.current);
-        };
+        return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
     return (
         <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
             <div className="container">
                 <div className="navbar-content">
-                    {/* Centered brand that appears only while scrolling */}
-                    <div style={{
-                        position: 'absolute',
-                        left: '50%',
-                        transform: isScrolling ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(-8px)',
-                        opacity: isScrolling ? 1 : 0,
-                        transition: 'opacity 0.25s ease, transform 0.25s ease',
-                        pointerEvents: 'none',
-                        whiteSpace: 'nowrap',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                    }}>
+                    {/* Left: Brand Tag */}
+                    <span className="nav-brand-tag">
                         <span style={{
-                            width: '12px', height: '12px', background: 'var(--primary)',
+                            width: '10px', height: '10px', background: 'var(--primary)',
                             borderRadius: '50%', display: 'inline-block', flexShrink: 0,
                         }} />
-                        <span style={{ fontWeight: 800, fontSize: '1.6rem', color: 'var(--text-main)' }}>
+                        <span style={{ fontWeight: 800, fontSize: '1.1rem', letterSpacing: '0.05em', color: 'var(--primary)' }}>
                             Think. Create. Connect.
                         </span>
-                    </div>
-
+                    </span>
                     {/* Right: Navigation Links */}
                     <div className="navbar-links">
                         <a href="/#resume" className="nav-link">Company</a>
+                        <span className="nav-separator">|</span>
+                        <a href="/#offerings" className="nav-link">Services</a>
                         <span className="nav-separator">|</span>
                         <a href="/#projects" className="nav-link">Projects</a>
                         <span className="nav-separator">|</span>

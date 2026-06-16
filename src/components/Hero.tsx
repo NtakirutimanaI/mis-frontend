@@ -7,125 +7,70 @@ interface HeroProps {
     profile: Profile;
 }
 
-interface WritingLine {
-    text: string;
-    delay: number;
-    duration: number;
-}
-interface SlideData {
-    lines: WritingLine[];
+interface SlideContent {
+    title: string;
+    body: string;
     color: string;
 }
 
-const writingLines: SlideData[] = [
+const writingLines: SlideContent[] = [
     {
         color: '#7BC043',
-        lines: [
-            { text: 'ICT SERVICES', delay: 0.3, duration: 1.5 },
-            { text: 'Networking', delay: 2.5, duration: 1.2 },
-            { text: 'Cloud Solutions', delay: 4.5, duration: 1.4 },
-            { text: 'IT Support', delay: 6.5, duration: 1.2 },
-        ],
+        title: 'ICT SERVICES',
+        body: 'End-to-end ICT infrastructure including networking, cloud solutions, and enterprise IT support tailored to keep your business running securely and efficiently.',
     },
     {
         color: '#ff5252',
-        lines: [
-            { text: 'DASHBOARDS', delay: 0.3, duration: 1.5 },
-            { text: 'Analytics', delay: 2.5, duration: 1.2 },
-            { text: 'KPI Reports', delay: 4.5, duration: 1.3 },
-            { text: 'Data Viz', delay: 6.5, duration: 1.1 },
-        ],
+        title: 'DASHBOARDS',
+        body: 'Real-time analytics dashboards and KPI reporting systems that transform raw data into actionable insights for informed decision-making.',
     },
     {
         color: '#4ecdc4',
-        lines: [
-            { text: 'INNOVATIONS', delay: 0.3, duration: 1.5 },
-            { text: 'Artificial Intelligence', delay: 2.5, duration: 1.8 },
-            { text: 'IoT Solutions', delay: 5.0, duration: 1.3 },
-            { text: 'Smart Systems', delay: 7.0, duration: 1.3 },
-        ],
+        title: 'INNOVATIONS',
+        body: 'Cutting-edge solutions in Artificial Intelligence, IoT, and smart systems designed to drive digital transformation and competitive advantage.',
     },
     {
         color: '#2d2d2d',
-        lines: [
-            { text: 'DIGITAL SOLUTIONS', delay: 0.3, duration: 1.7 },
-            { text: 'Web Development', delay: 2.8, duration: 1.4 },
-            { text: 'Mobile Apps', delay: 5.0, duration: 1.2 },
-            { text: 'ERP Systems', delay: 7.0, duration: 1.1 },
-        ],
+        title: 'DIGITAL SOLUTIONS',
+        body: 'Full-stack web and mobile development, ERP systems, and custom software engineering to digitize and streamline your business operations.',
     },
 ];
 
-const HandWriting: React.FC<{ lines: WritingLine[]; color: string }> = ({ lines, color }) => {
-    const [revealedCount, setRevealedCount] = useState(0);
+const sideSlides: SlideContent[] = [
+    {
+        color: '#7BC043',
+        title: 'ABOUT US',
+        body: 'We are a team of passionate technologists dedicated to delivering innovative solutions that empower businesses to thrive in the digital age. Our expertise spans infrastructure, software, and strategy.',
+    },
+    {
+        color: '#4ecdc4',
+        title: 'OUR MISSION',
+        body: 'To empower organizations through cutting-edge technology and digital transformation, enabling them to achieve more with smarter, scalable, and secure systems.',
+    },
+];
 
-    useEffect(() => {
-        setRevealedCount(0);
-        const timers: number[] = [];
-        lines.forEach((line) => {
-            const t = window.setTimeout(() => {
-                setRevealedCount((prev) => prev + 1);
-            }, line.delay * 1000);
-            timers.push(t);
-        });
-        return () => timers.forEach(clearTimeout);
-    }, [lines]);
-
-    return (
-        <div className="handwriting-wrap">
-            <svg viewBox="0 0 400 160" className="handwriting-svg">
-                <defs>
-                    <clipPath id={`reveal-${color.replace('#', '')}`}>
-                        <rect x="0" y="0" width="400" height="160" />
-                    </clipPath>
-                </defs>
-                {lines.map((line, i) => (
-                    <g key={i}>
-                        <text
-                            x="90"
-                            y={38 + i * 32}
-                            className="hw-text"
-                            fill={color}
-                            opacity={i < revealedCount ? 1 : 0}
-                            style={{
-                                transition: `opacity 0.3s ease ${(line.duration - 0.3).toFixed(1)}s`,
-                            }}
-                        >
-                            {line.text}
-                        </text>
-                        <text
-                            x="90"
-                            y={38 + i * 32}
-                            className="hw-text-stroke"
-                            fill="none"
-                            stroke={color}
-                            strokeWidth="2"
-                            strokeDasharray="400"
-                            strokeDashoffset={i < revealedCount ? 0 : 400}
-                            style={{
-                                transition: `stroke-dashoffset ${line.duration}s ease ${line.delay}s`,
-                            }}
-                        >
-                            {line.text}
-                        </text>
-                    </g>
-                ))}
-            </svg>
-        </div>
-    );
-};
+const SlideText: React.FC<{ data: SlideContent }> = ({ data }) => (
+    <div className="hero-slide-text">
+        <h2 className="hero-slide-title">{data.title}</h2>
+        <p className="hero-slide-body">{data.body}</p>
+    </div>
+);
 
 const slides = [
-    { data: writingLines[0] },
-    { data: writingLines[1] },
-    { data: writingLines[2] },
-    { data: writingLines[3] },
+    { data: writingLines[0], bg: 'https://picsum.photos/seed/heromain1/800/420' },
+    { data: writingLines[1], bg: 'https://picsum.photos/seed/heromain2/800/420' },
+    { data: writingLines[2], bg: 'https://picsum.photos/seed/heromain3/800/420' },
+    { data: writingLines[3], bg: 'https://picsum.photos/seed/heromain4/800/420' },
+    { data: sideSlides[0], bg: 'https://picsum.photos/seed/heroside2/800/420' },
+    { data: sideSlides[1], bg: 'https://picsum.photos/seed/heroside3/800/420' },
 ];
+
 
 const Hero: React.FC<HeroProps> = ({ profile }) => {
     const [current, setCurrent] = useState(0);
     const [showNav, setShowNav] = useState(false);
     const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+    const autoTimer = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
     const showNavTemporarily = useCallback(() => {
         setShowNav(true);
@@ -143,16 +88,34 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
     }, []);
 
     const next = useCallback(() => {
-        setCurrent((prev) => (prev + 1) % slides.length);
+        setCurrent((prev) => (prev < 3 ? prev + 1 : 0));
     }, []);
 
     const prev = useCallback(() => {
-        setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
+        setCurrent((prev) => (prev > 0 ? prev - 1 : 3));
     }, []);
 
     useEffect(() => {
-        const timer = setInterval(next, 12000);
-        return () => clearInterval(timer);
+        autoTimer.current = setInterval(next, 12000);
+        return () => clearInterval(autoTimer.current);
+    }, [next]);
+
+    const goToSlide = useCallback((index: number) => {
+        setCurrent(index);
+        clearInterval(autoTimer.current);
+        autoTimer.current = setInterval(next, 12000);
+    }, [next]);
+
+    const handlePrev = useCallback(() => {
+        prev();
+        clearInterval(autoTimer.current);
+        autoTimer.current = setInterval(next, 12000);
+    }, [prev, next]);
+
+    const handleNext = useCallback(() => {
+        next();
+        clearInterval(autoTimer.current);
+        autoTimer.current = setInterval(next, 12000);
     }, [next]);
 
     return (
@@ -182,35 +145,53 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
 
                     {/* Right: Image Slider */}
                     <div className="hero-slider">
-                        <div className="hero-slider-viewport">
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={current}
-                                    className="hero-slide"
-                                    initial={{ opacity: 0, x: 60 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -60 }}
-                                    transition={{ duration: 0.8 }}
-                                >
-                                    <HandWriting lines={slides[current].data.lines} color={slides[current].data.color} />
-                                </motion.div>
-                            </AnimatePresence>
+                        <div className="hero-slider-inner">
+                            <div className="hero-slider-viewport">
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={current}
+                                        className="hero-slide"
+                                        style={{ backgroundImage: `url(${slides[current].bg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        <div className="hero-slide-overlay" />
+                                        <SlideText data={slides[current].data} />
+                                    </motion.div>
+                                </AnimatePresence>
+                            </div>
+                            <div
+                                className={`hero-side-card ${current === 4 ? 'active' : ''}`}
+                                style={{ backgroundImage: 'url(https://picsum.photos/seed/heroside2/100/800)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+                                onClick={() => goToSlide(4)}
+                            >
+                                <span className="hero-side-card__label">About us</span>
+                            </div>
+                            <div
+                                className={`hero-side-card ${current === 5 ? 'active' : ''}`}
+                                style={{ backgroundImage: 'url(https://picsum.photos/seed/heroside3/100/800)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+                                onClick={() => goToSlide(5)}
+                            >
+                                <span className="hero-side-card__label">About us</span>
+                            </div>
                         </div>
 
                         <div className="hero-slider-nav">
-                            <button className="hero-slider-arrow" onClick={prev} aria-label="Previous">
+                            <button className="hero-slider-arrow" onClick={handlePrev} aria-label="Previous">
                                 <FaChevronLeft />
                             </button>
                             <div className="hero-slider-dots">
-                                {slides.map((_, i) => (
+                                {slides.slice(0, 4).map((_, i) => (
                                     <span
                                         key={i}
                                         className={`hero-slider-dot ${i === current ? 'active' : ''}`}
-                                        onClick={() => setCurrent(i)}
+                                        onClick={() => goToSlide(i)}
                                     />
                                 ))}
                             </div>
-                            <button className="hero-slider-arrow" onClick={next} aria-label="Next">
+                            <button className="hero-slider-arrow" onClick={handleNext} aria-label="Next">
                                 <FaChevronRight />
                             </button>
                         </div>

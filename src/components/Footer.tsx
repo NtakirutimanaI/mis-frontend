@@ -63,6 +63,7 @@ const Footer: React.FC<FooterProps> = ({ profile }) => {
                             <h4 className="ark-footer__col-title">Quick Links</h4>
                             <a href="/#home" className="ark-footer__nav-link">Home</a>
                             <a href="/#resume" className="ark-footer__nav-link">About</a>
+                            <a href="/#offerings" className="ark-footer__nav-link">Services</a>
                             <a href="/#projects" className="ark-footer__nav-link">Projects</a>
                             <a href="/#team" className="ark-footer__nav-link">Team</a>
                             <a href="/#contact" className="ark-footer__nav-link">Contact</a>

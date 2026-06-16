@@ -1,4 +1,5 @@
 import Hero from '../../components/Hero';
+import WhatWeOffer from '../../components/WhatWeOffer';
 import Experience from '../../components/Experience';
 import Projects from '../../components/Projects';
 import TeamMembers from '../../components/TeamMembers';
@@ -25,6 +26,8 @@ const Home = () => {
     return (
         <>
             <Hero profile={profile} />
+            <div className="section-divider" />
+            <WhatWeOffer />
             <div className="section-divider" />
             <Experience profile={profile} />
             <div className="section-divider" />
