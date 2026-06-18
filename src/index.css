@@ -1321,6 +1321,7 @@ img {
   .nav-brand-tag {
     flex-direction: column;
     gap: 2px;
+    transform: translateX(calc(-50% - 50px));
   }
 
   .nav-link {
