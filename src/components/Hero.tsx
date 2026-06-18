@@ -170,6 +170,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                             <span className="hero-stat__value"><CountUp to={profile.teamMembers?.length || 0} suffix="+" /></span>
                             <span className="hero-stat__label">Team Members</span>
                         </div>
+                        <a href="/#offerings" className="hero-get-started">Get Started →</a>
                     </div>
 
                     {/* Right: Image Slider */}

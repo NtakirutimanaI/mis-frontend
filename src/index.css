@@ -1617,6 +1617,23 @@ img {
   border-radius: 4px;
 }
 
+.hero-get-started {
+  display: inline-block;
+  background: var(--primary);
+  color: #fff;
+  padding: 0.75rem 2rem;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s, transform 0.2s;
+  margin-top: 1rem;
+}
+.hero-get-started:hover {
+  background: #6aad3a;
+  transform: translateY(-2px);
+}
+
 /* Mobile Responsive */
 @media (max-width: 968px) {
   .hero-grid {
