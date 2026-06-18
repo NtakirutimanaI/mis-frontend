@@ -14,7 +14,7 @@ const Skills: React.FC<SkillsProps> = ({ profile }) => {
                     <div className="resume-title">Skills</div>
                     <div className="resume-list" style={{ gap: '2rem' }}>
                         {categories.map((cat) => (
-                            <div key={cat} className="resume-item" style={{ gridTemplateColumns: '150px 1fr' }}>
+                            <div key={cat} className="resume-item">
                                 <div className="resume-date" style={{ textTransform: 'capitalize' }}>
                                     {cat}
                                 </div>

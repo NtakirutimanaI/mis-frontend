@@ -79,7 +79,7 @@ const Contact: React.FC<ContactProps> = ({ profile }) => {
                         <h3 className="ark-contact__card-title">Send us a message</h3>
                         <p className="ark-contact__card-desc">Fill out the form and we'll get back to you within 24 hours</p>
                         <form onSubmit={handleSubmit} className="ark-contact__form">
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div className="ark-contact__form-row">
                                 <label>
                                     First Name *
                                     <input type="text" name="firstName" required value={localData.firstName} onChange={handleChange} placeholder="John" />
@@ -89,7 +89,7 @@ const Contact: React.FC<ContactProps> = ({ profile }) => {
                                     <input type="text" name="lastName" required value={localData.lastName} onChange={handleChange} placeholder="Doe" />
                                 </label>
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div className="ark-contact__form-row">
                                 <label>
                                     Email *
                                     <input type="email" name="email" required value={localData.email} onChange={handleChange} placeholder="john@example.com" />
