@@ -47,6 +47,11 @@ const sideSlides: SlideContent[] = [
         title: 'OUR MISSION',
         body: 'To empower organizations through cutting-edge technology and digital transformation, enabling them to achieve more with smarter, scalable, and secure systems.',
     },
+    {
+        color: '#ff9f43',
+        title: 'OUR VALUES',
+        body: 'Integrity, innovation, and collaboration drive everything we do. We believe in building lasting partnerships through transparency, quality, and a relentless commitment to excellence.',
+    },
 ];
 
 const SlideText: React.FC<{ data: SlideContent }> = ({ data }) => (
@@ -63,6 +68,7 @@ const slides = [
     { data: writingLines[3], bg: 'https://picsum.photos/seed/heromain4/800/420' },
     { data: sideSlides[0], bg: 'https://picsum.photos/seed/heroside2/800/420' },
     { data: sideSlides[1], bg: 'https://picsum.photos/seed/heroside3/800/420' },
+    { data: sideSlides[2], bg: 'https://picsum.photos/seed/heroside4/800/420' },
 ];
 
 
@@ -199,6 +205,14 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                                 onMouseLeave={sideCardLeave}
                             >
                                 <span className="hero-side-card__label">Our Mission</span>
+                            </div>
+                            <div
+                                className={`hero-side-card ${hoveredCard === 6 ? 'active' : ''}`}
+                                style={{ backgroundImage: 'url(https://picsum.photos/seed/heroside4/100/800)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+                                onMouseEnter={() => sideCardEnter(6)}
+                                onMouseLeave={sideCardLeave}
+                            >
+                                <span className="hero-side-card__label">Our Values</span>
                             </div>
                         </div>
 
