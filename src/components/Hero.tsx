@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import type { Profile } from '../services/profileService';
+import CountUp from './CountUp';
 
 interface HeroProps {
     profile: Profile;
@@ -158,15 +159,15 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                     {/* Stats (independent) */}
                     <div className="hero-stats">
                         <div className="hero-stat">
-                            <span className="hero-stat__value">4+</span>
+                            <span className="hero-stat__value"><CountUp to={4} suffix="+" /></span>
                             <span className="hero-stat__label">Years of Experience</span>
                         </div>
                         <div className="hero-stat">
-                            <span className="hero-stat__value">11+</span>
+                            <span className="hero-stat__value"><CountUp to={11} suffix="+" /></span>
                             <span className="hero-stat__label">Projects Completed</span>
                         </div>
                         <div className="hero-stat">
-                            <span className="hero-stat__value">5+</span>
+                            <span className="hero-stat__value"><CountUp to={5} suffix="+" /></span>
                             <span className="hero-stat__label">Team Members</span>
                         </div>
                     </div>
