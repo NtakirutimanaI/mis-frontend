@@ -49,7 +49,7 @@ const sideSlides: SlideContent[] = [
     },
     {
         color: '#ff9f43',
-        title: 'OUR VALUES',
+        title: 'VISION & VALUES',
         body: 'Integrity, innovation, and collaboration drive everything we do. We believe in building lasting partnerships through transparency, quality, and a relentless commitment to excellence.',
     },
 ];
@@ -212,7 +212,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                                 onMouseEnter={() => sideCardEnter(6)}
                                 onMouseLeave={sideCardLeave}
                             >
-                                <span className="hero-side-card__label">Our Values</span>
+                                <span className="hero-side-card__label">Vision & Values</span>
                             </div>
                         </div>
 
