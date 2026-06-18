@@ -1216,12 +1216,10 @@ img {
 }
 
 .nav-brand-tag {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  margin-left: -20px;
   text-decoration: none;
   cursor: default;
 }
@@ -1311,17 +1309,10 @@ img {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: auto;
   }
 
   .nav-mobile-menu {
     display: flex;
-  }
-
-  .nav-brand-tag {
-    flex-direction: column;
-    gap: 2px;
-    transform: translateX(calc(-50% - 50px));
   }
 
   .nav-link {
