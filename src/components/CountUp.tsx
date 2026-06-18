@@ -1,5 +1,4 @@
-import { useRef, useEffect } from 'react';
-import { useInView, animate } from 'framer-motion';
+import { useRef, useEffect, useState } from 'react';
 
 interface CountUpProps {
   to: number;
@@ -8,26 +7,29 @@ interface CountUpProps {
 }
 
 const CountUp: React.FC<CountUpProps> = ({ to, suffix = '', duration = 2 }) => {
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const [displayed, setDisplayed] = useState(0);
+  const started = useRef(false);
 
   useEffect(() => {
-    if (!isInView) return;
-    const node = ref.current;
-    if (!node) return;
+    if (started.current) return;
+    started.current = true;
 
-    const controls = animate(0, to, {
-      duration,
-      ease: 'easeOut',
-      onUpdate(value) {
-        node.textContent = `${Math.round(value)}${suffix}`;
-      },
-    });
+    const startTime = performance.now();
+    const target = to;
 
-    return () => controls.stop();
-  }, [isInView, to, suffix, duration]);
+    const tick = (now: number) => {
+      const elapsed = (now - startTime) / 1000;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(eased * target);
+      setDisplayed(current);
+      if (progress < 1) requestAnimationFrame(tick);
+    };
 
-  return <span ref={ref}>0{suffix}</span>;
+    requestAnimationFrame(tick);
+  }, [to, duration]);
+
+  return <span>{displayed}{suffix}</span>;
 };
 
 export default CountUp;
