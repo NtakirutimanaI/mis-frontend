@@ -198,7 +198,7 @@ const Hero: React.FC<HeroProps> = ({ profile }) => {
                                 onMouseEnter={() => sideCardEnter(5)}
                                 onMouseLeave={sideCardLeave}
                             >
-                                <span className="hero-side-card__label">About us</span>
+                                <span className="hero-side-card__label">Our Mission</span>
                             </div>
                         </div>
 

@@ -1216,10 +1216,12 @@ img {
 }
 
 .nav-brand-tag {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-left: -20px;
   text-decoration: none;
   cursor: default;
 }
@@ -1401,6 +1403,7 @@ img {
 .hero-slider-inner {
   display: flex;
   gap: 0.5rem;
+  align-items: center;
 }
 .hero-slider-viewport {
   position: relative;
@@ -1412,14 +1415,14 @@ img {
 }
 .hero-side-card {
   width: 50px;
-  height: 420px;
+  height: 100px;
   border: 2px solid var(--border-color);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: opacity 0.3s, border-color 0.3s;
+  transition: opacity 0.3s, border-color 0.3s, height 0.3s;
   position: relative;
 }
 .hero-side-card::after {
@@ -1720,6 +1723,7 @@ img {
 
   .hero-slider-inner .hero-side-card {
     width: 36px;
+    height: 80px;
   }
 
   .hero-side-card__label {
