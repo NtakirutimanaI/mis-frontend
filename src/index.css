@@ -1318,6 +1318,11 @@ img {
     display: flex;
   }
 
+  .nav-brand-tag {
+    flex-direction: column;
+    gap: 2px;
+  }
+
   .nav-link {
     font-size: 0.85rem;
   }
