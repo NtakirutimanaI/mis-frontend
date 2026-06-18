@@ -1620,19 +1620,7 @@ img {
   }
 
   .hero-left-col {
-    grid-row: auto;
-    grid-column: auto;
-  }
-
-  .hero-avatar-container {
-    margin-left: 0;
-    margin-top: 0;
-    justify-content: center;
-  }
-
-  .hero-avatar {
-    width: 300px;
-    height: 300px;
+    display: none;
   }
 
   .hero-stats {
@@ -1641,11 +1629,13 @@ img {
     margin-bottom: 0;
     justify-content: center;
     gap: 1.5rem;
+    order: 2;
   }
 
   .hero-slider {
     width: 100%;
     margin-left: 0;
+    order: 1;
   }
 
   .hero-slider-viewport {
@@ -1662,11 +1652,6 @@ img {
 }
 
 @media (max-width: 576px) {
-  .hero-avatar {
-    width: 200px;
-    height: 200px;
-  }
-
   .hero-stats {
     gap: 1rem;
     flex-wrap: wrap;
@@ -1694,11 +1679,6 @@ img {
 }
 
 @media (max-width: 400px) {
-  .hero-avatar {
-    width: 160px;
-    height: 160px;
-  }
-
   .hero-stat__value {
     font-size: 1.6rem;
   }
